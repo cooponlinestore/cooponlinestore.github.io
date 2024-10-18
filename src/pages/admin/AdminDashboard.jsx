@@ -3,6 +3,7 @@ import { database, logout } from "../../firebase"; // Import Realtime Database i
 import { ref, onValue } from "firebase/database"; // Import Realtime Database functions
 import "../../css/AdminDashboard.css";
 import { useNavigate } from "react-router-dom";
+import ProfileManagement from "../student/ProfileManagement";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -22,6 +23,13 @@ const AdminDashboard = () => {
     await logout(); // Call the logout function
     navigate("/login"); // Redirect to login page after logout
   };
+
+    // Toggle Profile Sidebar
+    const [isProfileOpen, setIsProfileOpen] = useState(false); 
+    const toggleProfileSidebar = () => {
+      setIsProfileOpen((prevState) => !prevState); // Toggle sidebar state
+    };
+    
 
   const [totalOrders, setTotalOrders] = useState(0);
   const [pendingOrders, setPendingOrders] = useState(0);
@@ -74,24 +82,37 @@ const AdminDashboard = () => {
       <button onClick={goToOrderManagement}>Orders</button>
       <button onClick={goToProductManagement}>Manage Products</button>
       <button onClick={goToUserManagement}>Users</button>
+
+      {/* Sidebar for ProfileManagement */}
+<button onClick={toggleProfileSidebar}>Profile</button> {/* Add Profile Button */}
+{isProfileOpen && <ProfileManagement onClose={toggleProfileSidebar} />}
+      
       <h1>Admin Dashboard</h1>
       <div className="stats">
+      <button onClick={goToOrderManagement}>
         <div className="stat">
           <h3>Total Orders</h3>
           <p>{totalOrders}</p>
         </div>
+        </button>
+        <button onClick={goToOrderManagement}>
         <div className="stat">
           <h3>Pending Orders</h3>
           <p>{pendingOrders}</p>
         </div>
+        </button>
+        <button onClick={goToProductManagement}>
         <div className="stat">
           <h3>Total Products</h3>
           <p>{totalProducts}</p>
         </div>
+        </button>
+        <button onClick={goToProductManagement}>
         <div className="stat">
           <h3>Out-of-Stock Products</h3>
           <p>{outOfStockProducts}</p>
         </div>
+        </button>
       </div>
     </div>
   );

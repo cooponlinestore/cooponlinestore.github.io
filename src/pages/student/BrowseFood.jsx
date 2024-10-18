@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { database, ref, onValue, logout } from "../../firebase";// Assuming you have a firebase.js setup for Firebase
+import { ref, onValue, push } from "../../firebase"; // Import push for saving data to Firebase
+import { database, auth, getAuth, logout } from "../../firebase"; // Assuming firebase.js is setup correctly // Import Firebase auth to get the user ID
 import { useNavigate } from "react-router-dom";
+import ProfileManagement from "./ProfileManagement"; 
 
 const BrowseFood = () => {
   const [foodItems, setFoodItems] = useState([]);
@@ -9,13 +11,19 @@ const BrowseFood = () => {
   const [filterCategory, setFilterCategory] = useState("All");
   const [totalAmount, setTotalAmount] = useState(0); // Total amount state
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("");
-  const [pickupTime, setPickupTime] = useState(""); // Pick-up time selection
-
+  const user = getAuth().currentUser; // Get the current authenticated user
   const navigate = useNavigate();
+  const [isProfileOpen, setIsProfileOpen] = useState(false); 
+
   const handleLogout = async () => {
     await logout(); // Call the logout function
     navigate("/login"); // Redirect to login page after logout
   };
+   // Toggle Profile Sidebar
+  const toggleProfileSidebar = () => {
+    setIsProfileOpen((prevState) => !prevState); // Toggle sidebar state
+  };
+
   // Fetch food items from Firebase Realtime Database
   useEffect(() => {
     const productsRef = ref(database, "products");
@@ -87,23 +95,46 @@ const BrowseFood = () => {
   };
 
   // Handle checkout
-  const handleCheckout = () => {
-    if (!pickupTime || !selectedPaymentMethod) {
-      alert("Please select a pickup time and payment method.");
+  const handleCheckout = async () => {
+    if (!selectedPaymentMethod) {
+      alert("Please select a payment method.");
       return;
     }
 
-    // Process order checkout logic here (e.g., save to Firebase or show confirmation)
-    console.log("Checkout successful", {
-      cart,
-      totalAmount,
-      pickupTime,
-      paymentMethod: selectedPaymentMethod,
-    });
+    if (cart.length === 0) {
+      alert("Your cart is empty.");
+      return;
+    }
 
-    // Reset cart after checkout
-    setCart([]);
-    alert("Order placed successfully!");
+    const order = {
+      customerId: user.uid, // The currently logged-in user
+      products: cart.map(({ name, price, quantity }) => ({
+        name,
+        price,
+        quantity,
+      })),
+      orderPrice: totalAmount,
+      orderTime: new Date().toISOString(), // Order time is the current time
+      paymentMethod: selectedPaymentMethod,
+      status: "pending", // Default status is Pending
+    };
+
+    try {
+      // Save the order to Firebase Realtime Database
+      const ordersRef = ref(database, "orders");
+      const newOrderRef = await push(ordersRef, order); // Push the order to the database
+      const newOrderId = newOrderRef.key; // Get the order ID
+      alert("Order placed successfully!");
+
+      // Navigate to Order Ticket page
+      navigate(`/order/${newOrderId}`);
+
+      // Reset cart after successful checkout
+      setCart([]);
+    } catch (error) {
+      console.error("Error placing order:", error);
+      alert("Failed to place order. Please try again.");
+    }
   };
 
   const categories = ["All", "Snacks", "Meals", "Beverages"];
@@ -112,6 +143,12 @@ const BrowseFood = () => {
     <div>
       <h1>Browse Food</h1>
       <button onClick={handleLogout}>Logout</button>
+
+      <button onClick={toggleProfileSidebar}>Profile</button> {/* Add Profile Button */}
+
+{/* Sidebar for ProfileManagement */}
+{isProfileOpen && <ProfileManagement onClose={toggleProfileSidebar} />}
+
 
       {/* Search and Filter Bar */}
       <div className="search-filter-bar">
@@ -176,17 +213,6 @@ const BrowseFood = () => {
         {/* Total Amount */}
         <h3>Total Amount: ₱{totalAmount}</h3>
 
-        {/* Pickup Time Selection */}
-        <label>
-          Pick-up Time:
-          <input
-            type="time"
-            value={pickupTime}
-            onChange={(e) => setPickupTime(e.target.value)}
-            required
-          />
-        </label>
-
         {/* Payment Method Selection */}
         <div className="payment-methods">
           <h4>Choose Payment Method</h4>
@@ -206,3 +232,4 @@ const BrowseFood = () => {
 };
 
 export default BrowseFood;
+

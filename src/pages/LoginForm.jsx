@@ -144,30 +144,9 @@ const LoginForm = () => {
 
   return (
     <div className="login-form">
-      <h2>Login with your ISAT University Email</h2>
-      {message && <p style={{ color: 'green' }}>{message}</p>} {/* Display success message */}
-      {error && <p style={{ color: 'red' }}>{error}</p>} {/* Display error message */}
-      
-      {/* Email and Password Login Form */}
-      <form onSubmit={handleEmailLogin}>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <button type="submit">Login with Email</button>
-      </form>
-
-      <p>or</p>
+      <h1>COOP ONLINE</h1>
+      <h2>Welcome</h2>
+      <h3>Login with your ISAT University Email</h3>
 
       {/* Google login button */}
       <button onClick={handleGoogleLogin}>Login with Google</button>

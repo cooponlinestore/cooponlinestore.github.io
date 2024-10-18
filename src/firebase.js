@@ -1,5 +1,5 @@
 import { getAuth, setPersistence, browserLocalPersistence, GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
-import { getDatabase, ref, get, set, remove, onValue } from "firebase/database"; // Import `remove` from Firebase database
+import { getDatabase, ref, get, set, remove, onValue, push, update } from "firebase/database"; // Import `remove` from Firebase database
 import app from "./services/firebaseConfig";
 
 // Initialize Firebase services
@@ -111,4 +111,4 @@ const saveUserData = async (uid, userData) => {
 };
 
 // Export necessary Firebase functions
-export { auth, signInWithGoogle, logout, getUserRole, checkIfUserExists, saveUserData, database, ref, remove, onValue };
+export { getAuth, auth, signInWithGoogle, logout, getUserRole, checkIfUserExists, saveUserData, database, ref, remove, onValue, push, update };

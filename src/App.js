@@ -9,6 +9,7 @@ import ProtectedRoutes from "./components/ProtectedRoutes"; // Route protection
 import ProductManagement from "./pages/admin/ProductManagement";
 import OrderManagement from "./pages/admin/OrderManagement";
 import UserManagement from "./pages/admin/UserManagement";
+import OrderTicket from "./pages/student/OrderTicket";
 function App() {
   return (
     <AuthProvider>
@@ -28,6 +29,8 @@ function App() {
           {/* Protect student route */}
           <Route element={<ProtectedRoutes />}>
             <Route path="/student/browse" element={<BrowseFood />} />
+            <Route path="/order/:orderId" element={<OrderTicket />} />
+
           </Route>
 
           {/* Catch-all route */}
