@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { database, logout } from "../../firebase"; // Import Realtime Database instance and logout function
 import { ref, onValue } from "firebase/database"; // Import Realtime Database functions
 import { useNavigate } from "react-router-dom";
-import ProfileManagement from "../student/ProfileManagement";
+import { Icon } from '@iconify/react';
+import ProfileManagement from "../student/ProfileManagement"; // Profile Management Component
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ const AdminDashboard = () => {
   const goToOrderManagement = () => {
     navigate("/admin/orders"); // Navigate to the Order Management page
   };
+
   const goToUserManagement = () => {
     navigate("/admin/users");
   };
@@ -23,12 +25,11 @@ const AdminDashboard = () => {
     navigate("/login"); // Redirect to login page after logout
   };
 
-    // Toggle Profile Sidebar
-    const [isProfileOpen, setIsProfileOpen] = useState(false); 
-    const toggleProfileSidebar = () => {
-      setIsProfileOpen((prevState) => !prevState); // Toggle sidebar state
-    };
-    
+  // Toggle Profile Sidebar
+  const [isProfileOpen, setIsProfileOpen] = useState(false); 
+  const toggleProfileSidebar = () => {
+    setIsProfileOpen((prevState) => !prevState); // Toggle sidebar state
+  };
 
   const [totalOrders, setTotalOrders] = useState(0);
   const [pendingOrders, setPendingOrders] = useState(0);
@@ -76,43 +77,92 @@ const AdminDashboard = () => {
   }, []);
 
   return (
-    <div className="admin-dashboard">
-      <button onClick={handleLogout}>Logout</button>
-      <button onClick={goToOrderManagement}>Orders</button>
-      <button onClick={goToProductManagement}>Manage Products</button>
-      <button onClick={goToUserManagement}>Users</button>
+    <div className="flex min-h-screen">
+      {/* Sidebar */}
+      <aside className="bg-custom-gray w-64 flex flex-col justify-between p-4">
+        <div>
+          {/* Logo */}
+          <div className="mb-8">
+            <img src="/coop.png" alt="Coop Online Logo" className="w-full h-20 object-contain mx-auto mb-24" />
+          </div>
+
+          {/* Menu Items */}
+          <nav className="space-y-8">
+            <button className="flex items-center space-x-2 bg-gray-50 text-custom-gray py-2 px-3 rounded-md w-full font-bold font-montserrat">
+              <Icon icon="carbon:dashboard" className="w-6 h-6" />
+              <span>Dashboard</span>
+            </button>
+            <button onClick={goToOrderManagement} className="flex items-center space-x-2 text-white hover:bg-white hover:text-custom-gray py-2 px-3 rounded-md w-full font-bold font-montserrat">
+              <Icon icon="ic:baseline-notifications" className="w-6 h-6" />
+              <span>Orders</span>
+            </button>
+            <button onClick={goToProductManagement} className="flex items-center space-x-2 text-white hover:bg-white hover:text-custom-gray py-2 px-3 rounded-md w-full font-bold font-montserrat">
+              <Icon icon="carbon:product" className="w-6 h-6" />
+              <span>Product Management</span>
+            </button>
+            <button onClick={goToUserManagement} className="flex items-center space-x-2 text-white hover:bg-white hover:text-custom-gray py-2 px-3 rounded-md w-full font-bold font-montserrat">
+              <Icon icon="mdi:account" className="w-6 h-6" />
+              <span>User Management</span>
+            </button>
+            <button onClick={handleLogout} className="text-red-600 bg-white py-2 px-4 rounded-md shadow-md font-semibold hover:bg-red-600 hover:text-white w-full">
+              Logout
+            </button>
+          </nav>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <main className="flex-1 bg-gray-100 p-8">
+        {/* Header */}
+        <header className="flex justify-between items-center bg-custom-gray p-4 rounded-md">
+          <h1 className="text-white text-xl font-semibold">Admin Dashboard</h1>
+          <div className="flex items-center space-x-4">
+            <Icon icon="ic:baseline-notifications" className="text-white w-8 h-8" />
+            <button onClick={toggleProfileSidebar}>
+              <Icon icon="ic:baseline-account-circle" className="text-white w-8 h-8" />
+            </button>
+          </div>
+        </header>
+
+        {/* Dashboard Content */}
+        <section className="mt-8 grid grid-cols-2 gap-4">
+          <button onClick={goToOrderManagement}>
+          <div className="bg-white shadow-md p-4 rounded-lg">
+            <h2 className="font-bold text-gray-600 mb-2">TOTAL ORDERS</h2>
+            <div className="h-20 bg-gray-50 rounded-md flex items-center justify-center text-2xl font-bold">
+              {totalOrders}
+            </div>
+          </div>
+          </button>
+          <button onClick={goToOrderManagement}>
+          <div className="bg-white shadow-md p-4 rounded-lg">
+            <h2 className="font-bold text-gray-600 mb-2">PENDING ORDERS</h2>
+            <div className="h-20 bg-gray-50 rounded-md flex items-center justify-center text-2xl font-bold">
+              {pendingOrders}
+            </div>
+          </div>
+          </button>
+          <button onClick={goToProductManagement}>
+          <div className="bg-white shadow-md p-4 rounded-lg">
+            <h2 className="font-bold text-gray-600 mb-2">TOTAL PRODUCTS</h2>
+            <div className="h-20 bg-gray-50 rounded-md flex items-center justify-center text-2xl font-bold">
+              {totalProducts}
+            </div>
+          </div>
+          </button>
+          <button onClick={goToProductManagement}>
+          <div className="bg-white shadow-md p-4 rounded-lg">
+            <h2 className="font-bold text-gray-600 mb-2">OUT-OF-STOCK PRODUCTS</h2>
+            <div className="h-20 bg-gray-50 rounded-md flex items-center justify-center text-2xl font-bold">
+              {outOfStockProducts}
+            </div>
+          </div>
+          </button>
+        </section>
+      </main>
 
       {/* Sidebar for ProfileManagement */}
-<button onClick={toggleProfileSidebar}>Profile</button> {/* Add Profile Button */}
-{isProfileOpen && <ProfileManagement onClose={toggleProfileSidebar} />}
-      
-      <h1>Admin Dashboard</h1>
-      <div className="stats">
-      <button onClick={goToOrderManagement}>
-        <div className="stat">
-          <h3>Total Orders</h3>
-          <p>{totalOrders}</p>
-        </div>
-        </button>
-        <button onClick={goToOrderManagement}>
-        <div className="stat">
-          <h3>Pending Orders</h3>
-          <p>{pendingOrders}</p>
-        </div>
-        </button>
-        <button onClick={goToProductManagement}>
-        <div className="stat">
-          <h3>Total Products</h3>
-          <p>{totalProducts}</p>
-        </div>
-        </button>
-        <button onClick={goToProductManagement}>
-        <div className="stat">
-          <h3>Out-of-Stock Products</h3>
-          <p>{outOfStockProducts}</p>
-        </div>
-        </button>
-      </div>
+      {isProfileOpen && <ProfileManagement onClose={toggleProfileSidebar} />}
     </div>
   );
 };
