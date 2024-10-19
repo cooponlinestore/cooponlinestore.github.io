@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import ProfileManagement from "./ProfileManagement";
 import OrderTicket from "./OrderTicket";
 import { Icon } from "@iconify/react";
+import type { SVGProps } from "react";
 
 const BrowseFood = () => {
   const [foodItems, setFoodItems] = useState([]);
@@ -158,7 +159,9 @@ const BrowseFood = () => {
         </div>
         {/* Icons (Bell & User Profile) */}
         <div className="flex items-center space-x-4 gap-2 mr-4">
-        <button onClick={toggleOrderTicket}>Order Ticket</button> {/* Add Order Ticket Button */}
+        <button onClick={toggleOrderTicket}>
+          <Icon icon="lets-icons:order" className="text-white h-16 w-16" />
+        </button> 
           <button onClick={toggleProfileSidebar}>
             <Icon icon="ic:baseline-account-circle" className="text-white h-16 w-16" />
           </button>
@@ -218,7 +221,7 @@ const BrowseFood = () => {
                 className="flex justify-between items-center p-4 bg-Cardbg rounded-sm"
               >
                 <img
-                  src="/spring.png"
+                  src={item.image}
                   alt={item.name}
                   className="w-16 h-16 object-contain"
                 />
