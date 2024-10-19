@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import ProfileManagement from "./ProfileManagement";
 import OrderTicket from "./OrderTicket";
 import { Icon } from "@iconify/react";
-import type { SVGProps } from "react";
+
 
 const BrowseFood = () => {
   const [foodItems, setFoodItems] = useState([]);
@@ -270,7 +270,7 @@ const BrowseFood = () => {
                 >
                   <div className="flex items-center min-w-40">
                     <img
-                      src="/spring.png"
+                      src={cartItem.image}
                       alt={cartItem.name}
                       className="w-12 h-12 object-contain mr-2"
                     />
