@@ -1,27 +1,37 @@
 import React, { useState, useEffect } from "react";
 import { ref, onValue, push } from "../../firebase"; // Import push for saving data to Firebase
-import { database, auth, getAuth, logout } from "../../firebase"; // Assuming firebase.js is setup correctly // Import Firebase auth to get the user ID
+import { database, auth, getAuth, logout } from "../../firebase"; // Assuming firebase.js is setup correctly
 import { useNavigate } from "react-router-dom";
-import ProfileManagement from "./ProfileManagement"; 
+import ProfileManagement from "./ProfileManagement";
+import OrderTicket from "./OrderTicket";
+import { Icon } from "@iconify/react";
 
 const BrowseFood = () => {
   const [foodItems, setFoodItems] = useState([]);
   const [cart, setCart] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterCategory, setFilterCategory] = useState("All");
+  const [filterType, setFilterType] = useState("All");
   const [totalAmount, setTotalAmount] = useState(0); // Total amount state
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("");
   const user = getAuth().currentUser; // Get the current authenticated user
+  const [isOrderTicketOpen, setIsOrderTicketOpen] = useState(false); // State to control OrderTicket visibility at the bottom
+  const [currentOrderId, setCurrentOrderId] = useState(null); // State to track current order
   const navigate = useNavigate();
-  const [isProfileOpen, setIsProfileOpen] = useState(false); 
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   const handleLogout = async () => {
     await logout(); // Call the logout function
     navigate("/login"); // Redirect to login page after logout
   };
-   // Toggle Profile Sidebar
+
+  // Toggle Profile Sidebar
   const toggleProfileSidebar = () => {
     setIsProfileOpen((prevState) => !prevState); // Toggle sidebar state
+  };
+
+  // Toggle Order Ticket at the bottom
+  const toggleOrderTicket = () => {
+    setIsOrderTicketOpen((prevState) => !prevState); // Toggle order ticket visibility
   };
 
   // Fetch food items from Firebase Realtime Database
@@ -83,8 +93,8 @@ const BrowseFood = () => {
   // Filter food items based on the category
   const filterFoodItems = () => {
     let filteredItems = foodItems;
-    if (filterCategory !== "All") {
-      filteredItems = foodItems.filter((item) => item.category === filterCategory);
+    if (filterType !== "All") {
+      filteredItems = foodItems.filter((item) => item.type === filterType);
     }
     if (searchTerm) {
       filteredItems = filteredItems.filter((item) =>
@@ -124,10 +134,9 @@ const BrowseFood = () => {
       const ordersRef = ref(database, "orders");
       const newOrderRef = await push(ordersRef, order); // Push the order to the database
       const newOrderId = newOrderRef.key; // Get the order ID
+      setCurrentOrderId(newOrderId); // Set the current order ID to show the order ticket
+      setIsOrderTicketOpen(true); // Open the order ticket at the bottom
       alert("Order placed successfully!");
-
-      // Navigate to Order Ticket page
-      navigate(`/order/${newOrderId}`);
 
       // Reset cart after successful checkout
       setCart([]);
@@ -140,96 +149,215 @@ const BrowseFood = () => {
   const categories = ["All", "Snacks", "Meals", "Beverages"];
 
   return (
-    <div>
-      <h1>Browse Food</h1>
-      <button onClick={handleLogout}>Logout</button>
-
-      <button onClick={toggleProfileSidebar}>Profile</button> {/* Add Profile Button */}
-
-{/* Sidebar for ProfileManagement */}
-{isProfileOpen && <ProfileManagement onClose={toggleProfileSidebar} />}
-
-
-      {/* Search and Filter Bar */}
-      <div className="search-filter-bar">
-        <input
-          type="text"
-          placeholder="Search food..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-
-        {/* Category Filter Buttons */}
-        <div className="category-buttons">
-          {categories.map((category) => (
-            <button
-              key={category}
-              className={filterCategory === category ? "active" : ""}
-              onClick={() => setFilterCategory(category)}
-            >
-              {category}
-            </button>
-          ))}
+    <div className="min-h-screen bg-gray-100">
+      {/* Header Section */}
+      <header className="flex justify-between items-center bg-custom-gray p-4">
+        {/* Logo */}
+        <div className="flex items-center">
+          <img src="/coop.png" alt="Coop Online Logo" className="w-52 h-20" />
         </div>
-      </div>
-
-      {/* Food Items List */}
-      <div className="food-items">
-        {filterFoodItems().map((item) => (
-          <div key={item.id} className="food-item">
-            <h3>{item.name}</h3>
-            <p>{item.description}</p>
-            <p>Price: ₱{item.price}</p>
-            <button onClick={() => addToCart(item)}>Add to Cart</button>
-          </div>
-        ))}
-      </div>
-
-      {/* Cart Summary */}
-      <div className="cart-summary">
-        <h2>Cart</h2>
-        {cart.length === 0 ? (
-          <p>No items in cart</p>
-        ) : (
-          cart.map((cartItem) => (
-            <div key={cartItem.id} className="cart-item">
-              <p>{cartItem.name}</p>
-              <p>
-                Price: ₱{cartItem.price} x Quantity:{" "}
-                <button onClick={() => updateCartQuantity(cartItem.id, cartItem.quantity - 1)}>
-                  -
-                </button>{" "}
-                {cartItem.quantity}{" "}
-                <button onClick={() => updateCartQuantity(cartItem.id, cartItem.quantity + 1)}>
-                  +
-                </button>
-              </p>
-              <p>Total: ₱{cartItem.price * cartItem.quantity}</p>
-              <button onClick={() => removeFromCart(cartItem.id)}>Remove</button>
-            </div>
-          ))
-        )}
-
-        {/* Total Amount */}
-        <h3>Total Amount: ₱{totalAmount}</h3>
-
-        {/* Payment Method Selection */}
-        <div className="payment-methods">
-          <h4>Choose Payment Method</h4>
-          <button onClick={() => setSelectedPaymentMethod("Gcash")}>Gcash</button>
-          <button onClick={() => setSelectedPaymentMethod("Pay at Counter")}>
-            Pay at Counter
+        {/* Icons (Bell & User Profile) */}
+        <div className="flex items-center space-x-4 gap-2 mr-4">
+        <button onClick={toggleOrderTicket}>Order Ticket</button> {/* Add Order Ticket Button */}
+          <button onClick={toggleProfileSidebar}>
+            <Icon icon="ic:baseline-account-circle" className="text-white h-16 w-16" />
           </button>
         </div>
+      </header>
 
-        <p>Selected Payment Method: {selectedPaymentMethod}</p>
+      {/* Main Content */}
+      <main className="flex flex-col lg:flex-row gap-4 p-4 bg-gray-200 font-montserrat">
+        {/* Left Section: Product Menu and Product List */}
+        <div className="w-full lg:w-5/5 bg-gray-200 p-4 rounded-lg shadow">
+          {/* Product Menu */}
+          <div className="flex justify-evenly items-center">
+            {categories.map((category) => (
+              <div
+                key={category}
+                className="p-4 w-36 h-36 border-2 rounded-md shadow-md border-gray-100 text-center flex flex-col justify-center items-center bg-white cursor-pointer"
+                onClick={() => setFilterType(category)}
+              >
+                <Icon
+                  icon={
+                    category === "Beverages"
+                      ? "icon-park-outline:bottle-two"
+                      : category === "Snacks"
+                      ? "lucide:popcorn"
+                      : "fluent:cookies-16-regular"
+                  }
+                  className={`h-16 w-16 mx-auto ${
+                    category === "Beverages"
+                      ? "text-Drinks"
+                      : category === "Snacks"
+                      ? "text-Snacks"
+                      : "text-Biscuits"
+                  } mb-1`}
+                />
+                <span
+                  className={`${
+                    category === "Beverages"
+                      ? "text-Drinks"
+                      : category === "Snacks"
+                      ? "text-Snacks"
+                      : "text-Biscuits"
+                  } font-semibold font-montserrat`}
+                >
+                  {category}
+                </span>
+              </div>
+            ))}
+          </div>
 
-        {/* Checkout Button */}
-        <button onClick={handleCheckout}>Checkout</button>
-      </div>
+          {/* Product List */}
+          <h2 className="text-lg font-bold mb-4 mt-6">Products</h2>
+          <div className="grid grid-cols-3 gap-4 bg-gray-200">
+            {filterFoodItems().map((item) => (
+              <button
+                onClick={() => addToCart(item)}
+                key={item.id}
+                className="flex justify-between items-center p-4 bg-Cardbg rounded-sm"
+              >
+                <img
+                  src="/spring.png"
+                  alt={item.name}
+                  className="w-16 h-16 object-contain"
+                />
+                <div className="flex-1 px-4">
+                  <h3 className="font-bold">{item.name}</h3>
+                  <p className="text-sm text-black">{item.description}</p>
+                </div>
+                <span className="font-bold text-AllMenu">₱{item.price}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Right Section: Billing Section */}
+        <div className="w-full lg:w-2/5 bg-white p-4 rounded-lg shadow-md">
+          {/* Header Section */}
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-extrabold">Billing Section</h2>
+            {/* Customer Button */}
+            <div className="border-2 border-custom-gray font-bold flex items-center px-4 py-2 rounded-sm">
+              <Icon
+                icon="stash:people-group"
+                className="h-6 w-6 mr-2 text-custom-gray"
+              />
+              <span className="text-custom-gray">Customer</span>
+            </div>
+          </div>
+
+          {/* Table Header */}
+          <div className="grid grid-cols-[2fr_2fr_1fr_0.5fr] gap-2 text-center font-semibold text-sm mb-2">
+            <span>Item</span>
+            <span className="ml-7">Qty</span>
+            <span>Price</span>
+            <span>Delete</span>
+          </div>
+
+          {/* Product List in Cart */}
+          <div className="flex flex-col gap-4 overflow-y-auto h-auto">
+            {cart.length === 0 ? (
+              <p>No items in cart</p>
+            ) : (
+              cart.map((cartItem) => (
+                <div
+                  key={cartItem.id}
+                  className="flex items-center justify-between py-2 border-t"
+                >
+                  <div className="flex items-center min-w-40">
+                    <img
+                      src="/spring.png"
+                      alt={cartItem.name}
+                      className="w-12 h-12 object-contain mr-2"
+                    />
+                    <div>
+                      <h3 className="font-semibold">{cartItem.name}</h3>
+                      <p className="text-sm text-gray-500">{cartItem.description}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-center">
+                    <button
+                      onClick={() => updateCartQuantity(cartItem.id, cartItem.quantity - 1)}
+                      className="text-center w-8 h-8 px-2 py-1 border border-gray-300"
+                    >
+                      -
+                    </button>
+                    <input
+                      type="text"
+                      value={cartItem.quantity}
+                      className="w-8 h-8 text-center border-t border-b border-gray-300"
+                      readOnly
+                    />
+                    <button
+                      onClick={() => updateCartQuantity(cartItem.id, cartItem.quantity + 1)}
+                      className="text-center w-8 h-8 px-2 py-1 border border-gray-300"
+                    >
+                      +
+                    </button>
+                  </div>
+
+                  <span className="text-orange-500 font-bold text-center">
+                    ₱{cartItem.price}
+                  </span>
+
+                  <button
+                    onClick={() => removeFromCart(cartItem.id)}
+                    className="text-red-500 text-center"
+                  >
+                    <Icon icon="mdi:trash-can-outline" className="h-6 w-6" />
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Total Amount */}
+          <div className="mt-4 flex justify-between items-center">
+            <span className="text-lg font-bold">Total:</span>
+            <span className="text-lg font-bold">₱{totalAmount}</span>
+          </div>
+
+          <div className="mt-4 flex gap-2">
+            <button
+              onClick={() => setSelectedPaymentMethod("Gcash")}
+              className="flex items-center justify-evenly bg-gray-200 text-blue py-2 px-4 font-extrabold rounded-md h-16 w-full"
+            >
+              <img src="/gcash.png" alt="GCash" className="w-8 h-8" />
+              Gcash
+            </button>
+            <button
+              onClick={() => setSelectedPaymentMethod("Pay at Counter")}
+              className="bg-white text-[#FF9900] py-2 px-4 rounded-md h-16 w-full border font-extrabold border-AllMenu"
+            >
+              Pay at Counter
+            </button>
+          </div>
+
+          <p className="mt-4">Selected Payment Method: {selectedPaymentMethod}</p>
+
+          <button
+            onClick={handleCheckout}
+            className="bg-custom-dark text-white py-2 px-4 rounded-md mt-4 w-full font-bold"
+          >
+            Checkout
+          </button>
+        </div>
+      </main>
+
+      {/* Sidebar for ProfileManagement */}
+      {isProfileOpen && <ProfileManagement onClose={toggleProfileSidebar} />}
+
+         {/* Order Ticket at the bottom */}
+         {isOrderTicketOpen && currentOrderId && (
+        <OrderTicket
+          orderId={currentOrderId}
+          onClose={toggleOrderTicket} // Close Order Ticket
+        />
+      )}
     </div>
   );
 };
 
 export default BrowseFood;
-

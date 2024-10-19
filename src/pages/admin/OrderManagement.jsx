@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { ref, onValue, update, remove } from 'firebase/database';
 import { database } from '../../firebase';
 import { useNavigate } from 'react-router-dom';
-import "../../css/OrderManagement.css";
 
 const OrderManagement = () => {
   const [orders, setOrders] = useState([]);

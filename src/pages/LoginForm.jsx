@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { signInWithGoogle, logout, checkIfUserExists } from "../firebase"; // Import Firebase Google sign-in, logout, and checkIfUserExists functions
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth"; // Import Firebase Auth functions
+import "react-icons";
+
 
 const LoginForm = () => {
   const [message, setMessage] = useState(null); // State for success or error messages
@@ -143,17 +145,51 @@ const LoginForm = () => {
   }
 
   return (
-    <div className="login-form">
-      <h1>COOP ONLINE</h1>
-      <h2>Welcome</h2>
-      <h3>Login with your ISAT University Email</h3>
+    <div className="flex justify-center items-center h-screen w-screen bg-gray-100">  {/* Full screen centering */}
+      <div className="flex flex-row justify-start items-center w-[900px] h-[650px] bg-gray-300 rounded-[50px]">  {/* container */}
+        <div className="w-2/5 h-full flex flex-col justify-center items-center bg-custom-gray rounded-[50px]">  {/* left side */}
+          <div className="flex flex-col justify-center items-center w-full h-[200px]"> {/* container of peopleImg */}
+            <img
+              src="/people.png" 
+              alt="People "
+              className="w-[90%] h-[537px]"
+            />
+          </div>
+          <div className="flex flex-col justify-center items-center w-full h-[40px]"> {/* container of coopImgLeft */}
+            <img
+              src="/coop.png" 
+              alt="Coop Online Logo"
+              className="mt-5 w-[90%] h-[250px] object-cover"
+            />
+          </div>
+        </div>
 
-      {/* Google login button */}
-      <button onClick={handleGoogleLogin}>Login with Google</button>
-      
-      {/* Add a button for navigating to the registration page */}
-      <p>Don't have an account?</p>
-      <button onClick={() => navigate("/register")}>Register</button>
+        <div className="w-3/5 h-full flex flex-col items-center bg-gray-300 rounded-[50px]">  {/* right side */}
+          <div className="ml-[80px] mt-[10px] w-[80%] h-[80px] -mb-4"> {/* container coopImgRight */}
+            <img src="/coop.png" alt="a" className="w-[80%] h-[80%] object-contain"></img>
+          </div>
+          <div className="h-[39px] w-[169px] ml-[20px] mt-10 mb-10"> {/* Container Welcome Text */}
+            <h1 className="text-black opacity-60 font-montserrat font-welcome-font text-welcome-size">WELCOME!</h1>
+          </div>
+
+          {/* Login Button for Google */}
+          <div className="flex justify-center items-center h-[40px] w-[40%] mr-[5px] mt-20">
+            <button
+              onClick={handleGoogleLogin}
+              className="rounded-[24.5px] h-[40px] w-full bg-custom-dark text-white mb-[40px] outline outline-offset-2 outline-green-800"
+            >
+              LOG IN WITH GOOGLE
+            </button>      
+          </div>
+
+          {error && <div className="text-red-500">{error}</div>}
+          {message && <div className="text-green-500">{message}</div>}
+
+          <div className="flex justify-center items-center h-[40px] w-[40%] mr-[5px] mt-20">
+            <button onClick={() => navigate("/register")} className="rounded-[24.5px] h-[40px] w-full bg-custom-dark text-white mb-[40px] outline outline-offset-2 outline-green-600">SIGN UP</button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from "react";// For database operations
-import { database,ref, onValue, update  } from "../../firebase"; // Your Firebase setup
-import { useParams, useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { ref, onValue, update, database } from "../../firebase"; // Your Firebase setup
+import { useNavigate } from "react-router-dom";
 
-const OrderTicket = () => {
-  const { orderId } = useParams(); // Get the order ID from the URL params
+const OrderTicket = ({ orderId, onClose }) => {
   const [order, setOrder] = useState(null);
   const [timeLeft, setTimeLeft] = useState(""); // For countdown timer
   const navigate = useNavigate();
@@ -34,7 +33,7 @@ const OrderTicket = () => {
         if (timeLeftMillis > 0) {
           const minutes = Math.floor(timeLeftMillis / (1000 * 60));
           const seconds = Math.floor((timeLeftMillis % (1000 * 60)) / 1000);
-          setTimeLeft(`${minutes}:${seconds}`);
+          setTimeLeft(`${minutes}:${seconds < 10 ? `0${seconds}` : seconds}`);
         } else {
           setTimeLeft("Expired");
         }
@@ -44,36 +43,31 @@ const OrderTicket = () => {
     }
   }, [order]);
 
-  // Mark the order as completed
-  const handleCompleteOrder = async () => {
-    if (window.confirm("Are you sure you want to mark the order as complete?")) {
-      try {
-        const orderRef = ref(database, `orders/${orderId}`);
-        await update(orderRef, { status: "completed" });
-        alert("Order completed!");
-        navigate("/student/browse"); // Redirect to browse page after completion
-      } catch (error) {
-        console.error("Error completing order:", error);
-      }
-    }
-  };
-
-  if (!order) {
-    return <div>Loading order details...</div>;
-  }
-
   return (
-    <div>
-      <h1>Order Ticket</h1>
-      <p>Order ID: {orderId}</p>
-      <p>Time Left for Pickup: {timeLeft}</p>
-      <ul>
-        {order.products && order.products.map((product, index) => (
-          <li key={index}>{product.name} (x{product.quantity})</li>
-        ))}
-      </ul>
-      <h3>Total Price: ₱{order.orderPrice}</h3>
-      <button onClick={handleCompleteOrder}>Complete Order</button>
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+      <div className="bg-AllMenu text-white text-center p-8 rounded-md shadow-lg w-96">
+        <h2 className="text-2xl font-bold font-montserrat">Order Ticket</h2>
+        {order ? (
+          <>
+            <p className="text-2xl mt-4 font-bold font-montserrat">#{orderId}</p>
+            <p className="text-5xl font-bold font-montserrat my-4">{timeLeft}</p>
+            {order.products.map((product, index) => (
+              <p key={index} className="text-4xl mb-4 font-bold font-montserrat">
+                {product.name} (x{product.quantity})
+              </p>
+            ))}
+            <p className="text-3xl font-montserrat font-bold mb-4">₱{order.orderPrice}</p>
+            <button
+              onClick={onClose}
+              className="bg-white text-black font-bold font-montserrat py-2 px-6 rounded-md hover:text-white hover:bg-green-500"
+            >
+              Close
+            </button>
+          </>
+        ) : (
+          <p className="text-4xl mt-4 font-bold font-montserrat">Order not found</p>
+        )}
+      </div>
     </div>
   );
 };

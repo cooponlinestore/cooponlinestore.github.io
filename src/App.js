@@ -10,6 +10,8 @@ import ProductManagement from "./pages/admin/ProductManagement";
 import OrderManagement from "./pages/admin/OrderManagement";
 import UserManagement from "./pages/admin/UserManagement";
 import OrderTicket from "./pages/student/OrderTicket";
+import "react-icons"
+
 function App() {
   return (
     <AuthProvider>

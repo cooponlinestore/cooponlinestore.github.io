@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { database, logout } from "../../firebase"; // Import Realtime Database instance and logout function
 import { ref, onValue } from "firebase/database"; // Import Realtime Database functions
-import "../../css/AdminDashboard.css";
 import { useNavigate } from "react-router-dom";
 import ProfileManagement from "../student/ProfileManagement";
 
