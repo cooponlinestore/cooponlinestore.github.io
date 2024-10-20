@@ -5,14 +5,16 @@ import ProductForm from './ProductForm'; // Import ProductForm for adding/editin
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 import ProfileManagement from '../student/ProfileManagement';
+
 const ProductManagement = () => {
   const [products, setProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filter, setFilter] = useState("all"); // Filter by stock status (all, in-stock, out-of-stock)
   const [showForm, setShowForm] = useState(false); // Show/hide the form modal
   const [editingProductId, setEditingProductId] = useState(null); // Track the product being edited
-    
+
   const navigate = useNavigate();
+
   const goToAdminDashBoard = () => {
     navigate("/admin/dashboard"); // Navigate to the Admin Dashboard
   };
@@ -35,11 +37,10 @@ const ProductManagement = () => {
   };
 
   // Toggle Profile Sidebar
-  const [isProfileOpen, setIsProfileOpen] = useState(false); 
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const toggleProfileSidebar = () => {
     setIsProfileOpen((prevState) => !prevState); // Toggle sidebar state
   };
-
 
   // Fetch all products from Realtime Database
   useEffect(() => {
@@ -80,9 +81,9 @@ const ProductManagement = () => {
     const productName = product.name ? product.name.toLowerCase() : ""; // Safely access name
     const matchesSearch = productName.includes(searchTerm.toLowerCase());
     const productQuantity = product.quantity ? product.quantity : 0;    // Safely access quantity
-    const matchesFilter = filter === "all" || 
-                          (filter === "in-stock" && productQuantity > 0) || 
-                          (filter === "out-of-stock" && productQuantity === 0);
+    const matchesFilter = filter === "all" ||
+      (filter === "in-stock" && productQuantity > 0) ||
+      (filter === "out-of-stock" && productQuantity === 0);
     return matchesSearch && matchesFilter;
   });
 
@@ -192,15 +193,52 @@ const ProductManagement = () => {
           </table>
         </section>
 
-        {/* ProductForm Modal */}
-        {showForm && (
-          <div className="modal">
-            <ProductForm
-              productId={editingProductId}
-              onClose={() => setShowForm(false)} // Close the form
-            />
-          </div>
-        )}
+    {/* ProductForm Modal */}
+{showForm && (
+  <div className="fixed inset-0 bg-custom-gray bg-opacity-90 flex justify-center items-center z-50">
+    <div className="relative bg-white p-8 rounded-lg shadow-lg w-full max-w-lg">
+      
+      {/* Close Button */}
+      <button
+        className="absolute top-4 right-4 text-custom-gray font-bold text-xl hover:text-red-600 transition-colors duration-200"
+        onClick={() => setShowForm(false)}
+      >
+        &times;
+      </button>
+
+      {/* Modal Header */}
+      <h2 className="text-2xl font-montserrat font-extrabold text-custom-gray mb-6 text-center">
+        {editingProductId ? 'Edit Product' : 'Add Product'}
+      </h2>
+
+      {/* Product Form */}
+      <ProductForm
+        productId={editingProductId}
+        onClose={() => setShowForm(false)} // Close the form
+      />
+      
+      {/* Modal Footer: Action Buttons */}
+      <div className="mt-8 flex justify-end space-x-4">
+        <button
+          className="bg-gray-200 text-custom-gray font-bold py-2 px-6 rounded-md hover:bg-gray-300 transition-colors duration-200"
+          onClick={() => setShowForm(false)}
+        >
+          Cancel
+        </button>
+        <button
+          className="bg-AllMenu text-white font-bold py-2 px-6 rounded-md hover:bg-AllMenu-dark transition-colors duration-200"
+          onClick={() => {
+            // Handle form submission or any action needed
+          }}
+        >
+          {editingProductId ? 'Save Changes' : 'Add Product'}
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+
       </main>
 
       {/* Sidebar for ProfileManagement */}

@@ -99,31 +99,38 @@ const OrderManagement = () => {
 
   return (
     <div className="flex min-h-screen">
-      {/* Sidebar */}
-      <aside className="bg-custom-gray w-64 flex flex-col justify-between p-4">
-      <nav className="space-y-8">
-            <button onClick={goToAdminDashBoard} className="flex items-center space-x-2 text-white hover:bg-white hover:text-custom-gray py-2 px-3 rounded-md w-full font-bold font-montserrat">
-              <Icon icon="carbon:dashboard" className="w-6 h-6" />
-              <span>Dashboard</span>
-            </button>
-            <button onClick={goToOrderManagement} className="flex items-center space-x-2 bg-gray-50 text-custom-gray py-2 px-3 rounded-md w-full font-bold font-montserrat">
-              <Icon icon="ic:baseline-notifications" className="w-6 h-6" />
-              <span>Orders</span>
-            </button>
-            <button onClick={goToProductManagement} className="flex items-center space-x-2 text-white hover:bg-white hover:text-custom-gray py-2 px-3 rounded-md w-full font-bold font-montserrat">
-              <Icon icon="carbon:product" className="w-6 h-6" />
-              <span>Product Management</span>
-            </button>
-            <button onClick={goToUserManagement} className="flex items-center space-x-2 text-white hover:bg-white hover:text-custom-gray py-2 px-3 rounded-md w-full font-bold font-montserrat">
-              <Icon icon="mdi:account" className="w-6 h-6" />
-              <span>User Management</span>
-            </button>
-            <button onClick={handleLogout} className="text-red-600 bg-white py-2 px-4 rounded-md shadow-md font-semibold hover:bg-red-600 hover:text-white w-full">
-              Logout
-            </button>
-          </nav>
-      </aside>
+    {/* Sidebar */}
+    <aside className="bg-custom-gray w-64 flex flex-col justify-between p-4">
+      <div>
+        {/* Logo */}
+        <div className="mb-8">
+          <img src="/coop.png" alt="Coop Online Logo" className="w-full h-20 object-contain mx-auto mb-24" />
+        </div>
 
+        {/* Menu Items */}
+        <nav className="space-y-8">
+          <button onClick={goToAdminDashBoard} className="flex items-center space-x-2 text-white py-2 px-3 hover:bg-white hover:text-custom-gray rounded-md w-full font-bold font-montserrat">
+            <Icon icon="carbon:dashboard" className="w-6 h-6" />
+            <span>Dashboard</span>
+          </button>
+          <button onClick={goToOrderManagement} className="flex items-center space-x-2 bg-white text-custom-gray py-2 px-3 rounded-md w-full font-bold font-montserrat">
+            <Icon icon="ic:baseline-notifications" className="w-6 h-6" />
+            <span>Orders</span>
+          </button>
+          <button onClick={goToProductManagement} className="flex items-center space-x-2 text-white hover:bg-white hover:text-custom-gray py-2 px-3 rounded-md w-full font-bold font-montserrat">
+            <Icon icon="carbon:product" className="w-6 h-6" />
+            <span>Product Management</span>
+          </button>
+          <button onClick={goToUserManagement} className="flex items-center space-x-2 text-white hover:bg-white hover:text-custom-gray py-2 px-3 rounded-md w-full font-bold font-montserrat">
+            <Icon icon="mdi:account" className="w-6 h-6" />
+            <span>User Management</span>
+          </button>
+          <button onClick={handleLogout} className="text-red-600 bg-white py-2 px-4 rounded-md shadow-md font-semibold hover:bg-red-600 hover:text-white w-full">
+            Logout
+          </button>
+        </nav>
+      </div>
+    </aside>
       {/* Main Content */}
       <main className="flex-1 mt-2 ml-4 mr-4 h-full">
         {/* Header */}
