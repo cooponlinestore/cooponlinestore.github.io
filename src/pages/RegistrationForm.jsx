@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { signInWithGoogle, checkIfUserExists, saveUserData } from "../firebase"; // Import Firebase functions
+import { Icon } from "@iconify/react";
 
 const RegistrationForm = () => {
   const [userData, setUserData] = useState({
@@ -94,63 +95,86 @@ const RegistrationForm = () => {
   };
 
   return (
-    <div>
-      <h2>Regsr with your ISAT University Details</h2>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      {success && <p style={{ color: 'green' }}>{success}</p>}
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          name="name"
-          value={userData.name}
-          onChange={handleChange}
-          placeholder="Name"
-          required
-        />
-        <input
-          type="password"
-          name="password"
-          value={userData.password}
-          onChange={handleChange}
-          placeholder="Password"
-          required
-        />
-        <input
-          type="text"
-          name="program"
-          value={userData.program}
-          onChange={handleChange}
-          placeholder="Program"
-          required
-        />
-        <input
-          type="text"
-          name="section"
-          value={userData.section}
-          onChange={handleChange}
-          placeholder="Section"
-          required
-        />
-        <input
-          type="text"
-          name="studentId"
-          value={userData.studentId}
-          onChange={handleChange}
-          placeholder="Student ID"
-          required
-        />
-        <input
-          type="text"
-          name="year"
-          value={userData.year}
-          onChange={handleChange}
-          placeholder="Year"
-          required
-        />
-        <button type="submit" disabled={loading}>
-          {loading ? "Registering..." : "Submit and Authenticate with Google"}
-        </button>
-      </form>
+    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg">
+        <h2 className="text-2xl font-bold text-center text-custom-gray mb-6">Register with ISATU Details</h2>
+
+        {error && <p className="text-red-500 text-center">{error}</p>}
+        {success && <p className="text-green-500 text-center">{success}</p>}
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <input
+            type="text"
+            name="name"
+            value={userData.name}
+            onChange={handleChange}
+            placeholder="Full Name"
+            className="w-full px-4 py-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom-gray"
+            required
+          />
+          <input
+            type="password"
+            name="password"
+            value={userData.password}
+            onChange={handleChange}
+            placeholder="Password"
+            className="w-full px-4 py-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom-gray"
+            required
+          />
+          <input
+            type="text"
+            name="program"
+            value={userData.program}
+            onChange={handleChange}
+            placeholder="Program"
+            className="w-full px-4 py-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom-gray"
+            required
+          />
+          <input
+            type="text"
+            name="section"
+            value={userData.section}
+            onChange={handleChange}
+            placeholder="Section"
+            className="w-full px-4 py-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom-gray"
+            required
+          />
+          <input
+            type="text"
+            name="studentId"
+            value={userData.studentId}
+            onChange={handleChange}
+            placeholder="Student ID"
+            className="w-full px-4 py-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom-gray"
+            required
+          />
+          <input
+            type="text"
+            name="year"
+            value={userData.year}
+            onChange={handleChange}
+            placeholder="Year"
+            className="w-full px-4 py-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom-gray"
+            required
+          />
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-custom-gray text-white font-bold py-2 px-4 rounded-md hover:bg-custom-dark transition-colors"
+          >
+            {loading ? "Registering..." : "Submit and Authenticate with Google"}
+          </button>
+        </form>
+
+        <div className="mt-6 text-center">
+          <button
+            onClick={handleGoogleSignIn}
+            disabled={loading}
+            className="flex items-center justify-center w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
+          >
+          </button>
+        </div>
+      </div>
     </div>
   );
 };

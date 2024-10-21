@@ -122,7 +122,6 @@ const BrowseFood = () => {
 
     if (selectedPaymentMethod === "Gcash") {
       setGcashModalVisible(true); // Show GCash modal
-      return;
     }
 
     const order = {
@@ -161,6 +160,18 @@ const BrowseFood = () => {
   const handleCopyGcashNumber = () => {
     navigator.clipboard.writeText(gcashNumber);
     alert("GCash number copied to clipboard!");
+  };
+
+  // Handle downloading the QR code
+  const handleDownloadQrCode = () => {
+    const link = document.createElement("a");
+    link.href = gcashQrCode;
+    link.download = "gcash-qr-code.png";
+    link.click();
+
+    // Show order ticket modal after download
+    setIsOrderTicketOpen(true);
+    setGcashModalVisible(false);// Close the GCash modal after download
   };
 
   return (
@@ -392,13 +403,12 @@ const BrowseFood = () => {
               />
             </div>
             <div className="text-center">
-              <a
-                href={gcashQrCode}
-                download="gcash-qr-code.png"
-                className="bg-blue-600 text-white py-2 px-4 rounded-md"
+              <button
+                onClick={handleDownloadQrCode}
+                className="bg-blue-600 text-black py-2 px-4 rounded-md"
               >
                 Download QR Code
-              </a>
+              </button>
             </div>
             <div className="mt-6 flex justify-center">
               <button
