@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { ref, onValue, push } from "../../firebase"; // Import push for saving data to Firebase
-import { database, auth, getAuth, logout } from "../../firebase"; // Assuming firebase.js is setup correctly
+import { database, getAuth, logout } from "../../firebase"; // Assuming firebase.js is setup correctly
 import { useNavigate } from "react-router-dom";
 import ProfileManagement from "./ProfileManagement";
 import OrderTicket from "./OrderTicket";
 import { Icon } from "@iconify/react";
-
 
 const BrowseFood = () => {
   const [foodItems, setFoodItems] = useState([]);
@@ -14,11 +13,15 @@ const BrowseFood = () => {
   const [filterType, setFilterType] = useState("All");
   const [totalAmount, setTotalAmount] = useState(0); // Total amount state
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("");
+  const [gcashModalVisible, setGcashModalVisible] = useState(false); // For GCash modal visibility
   const user = getAuth().currentUser; // Get the current authenticated user
   const [isOrderTicketOpen, setIsOrderTicketOpen] = useState(false); // State to control OrderTicket visibility at the bottom
   const [currentOrderId, setCurrentOrderId] = useState(null); // State to track current order
   const navigate = useNavigate();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+
+  const gcashNumber = "09639865065"; // Seller's GCash number
+  const gcashQrCode = "/gcashqr.png"; // Path to the GCash QR Code image
 
   const handleLogout = async () => {
     await logout(); // Call the logout function
@@ -117,6 +120,11 @@ const BrowseFood = () => {
       return;
     }
 
+    if (selectedPaymentMethod === "Gcash") {
+      setGcashModalVisible(true); // Show GCash modal
+      return;
+    }
+
     const order = {
       customerId: user.uid, // The currently logged-in user
       products: cart.map(({ name, price, quantity }) => ({
@@ -148,6 +156,12 @@ const BrowseFood = () => {
   };
 
   const categories = ["All", "Snacks", "Meals", "Beverages"];
+
+  // Handle copying the GCash number
+  const handleCopyGcashNumber = () => {
+    navigator.clipboard.writeText(gcashNumber);
+    alert("GCash number copied to clipboard!");
+  };
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -352,8 +366,54 @@ const BrowseFood = () => {
       {/* Sidebar for ProfileManagement */}
       {isProfileOpen && <ProfileManagement onClose={toggleProfileSidebar} />}
 
-         {/* Order Ticket at the bottom */}
-         {isOrderTicketOpen && currentOrderId && (
+      {/* GCash Payment Modal */}
+      {gcashModalVisible && (
+        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-8 rounded-lg shadow-lg w-96">
+            <h2 className="text-2xl font-bold text-custom-gray mb-4 text-center">
+              GCash Payment
+            </h2>
+            <p className="text-lg font-semibold mb-2 text-center">GCash Number:</p>
+            <div className="flex items-center justify-center mb-4">
+              <span className="text-lg font-bold mr-2">{gcashNumber}</span>
+              <button
+                onClick={handleCopyGcashNumber}
+                className="text-blue-600 underline"
+              >
+                Copy
+              </button>
+            </div>
+            <p className="text-lg font-semibold mb-2 text-center">Scan QR Code:</p>
+            <div className="flex justify-center mb-4">
+              <img
+                src={gcashQrCode}
+                alt="GCash QR Code"
+                className="w-48 h-48 object-contain"
+              />
+            </div>
+            <div className="text-center">
+              <a
+                href={gcashQrCode}
+                download="gcash-qr-code.png"
+                className="bg-blue-600 text-white py-2 px-4 rounded-md"
+              >
+                Download QR Code
+              </a>
+            </div>
+            <div className="mt-6 flex justify-center">
+              <button
+                onClick={() => setGcashModalVisible(false)}
+                className="bg-red-500 text-white py-2 px-6 rounded-md"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Order Ticket at the bottom */}
+      {isOrderTicketOpen && currentOrderId && (
         <OrderTicket
           orderId={currentOrderId}
           onClose={toggleOrderTicket} // Close Order Ticket
