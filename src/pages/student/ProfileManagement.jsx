@@ -51,7 +51,7 @@ const ProfileManagement = ({ onClose }) => {
   };
 
   return (
-    <div className="fixed top-0 right-0 w-[400px] h-full bg-white shadow-lg z-50">
+    <div className="fixed top-0 right-0 w-full md:w-[400px] h-full bg-white shadow-lg z-50 overflow-y-auto">
       <div className="p-4 bg-custom-gray text-white flex justify-between items-center">
         <h2 className="text-lg font-bold">Profile Management</h2>
         <button onClick={onClose} className="text-4xl">&times;</button>
@@ -75,7 +75,7 @@ const ProfileManagement = ({ onClose }) => {
 
       {/* Account Settings Tab */}
       {activeTab === "account" && (
-        <div className="p-4">
+        <div className="p-4 space-y-4">
           <h3 className="text-lg font-bold mb-4">Account Settings</h3>
           <p className="mb-2">
             <strong>Email: </strong>{user.email}
@@ -120,7 +120,7 @@ const ProfileManagement = ({ onClose }) => {
 
       {/* Order History Tab */}
       {activeTab === "history" && (
-        <div className="p-4 overflow-y-auto">
+        <div className="p-4 overflow-y-auto space-y-4">
           <h3 className="text-lg font-bold mb-4">Order History</h3>
           {orderHistory.length === 0 ? (
             <p>No orders found.</p>
@@ -137,7 +137,7 @@ const ProfileManagement = ({ onClose }) => {
                   <p>
                     <strong>Status: </strong>{order.status}
                   </p>
-                  <ul>
+                  <ul className="space-y-1">
                     {order.products.map((product, index) => (
                       <li key={index}>
                         {product.name} (x{product.quantity})

@@ -166,6 +166,21 @@ const RegistrationForm = () => {
           </button>
         </form>
 
+        {/* Hypertext link for Sign In */}
+  <div className="mt-4 text-center">
+    <p className="text-gray-500">
+      Already have an Account?{" "}
+      <button
+        type="button"
+        onClick={() => navigate("/login")}
+        className="text-custom-gray underline hover:text-custom-dark"
+      >
+        Sign in
+      </button>
+    </p>
+  </div>
+
+
         <div className="mt-6 text-center">
           <button
             onClick={handleGoogleSignIn}
