@@ -56,7 +56,7 @@ const OrderTicket = ({ orderId, onClose }) => {
                 {product.name} (x{product.quantity})
               </p>
             ))}
-            <p className="text-3xl font-montserrat font-bold mb-4">₱{order.orderPrice}</p>
+            <p className="text-3xl font-montserrat font-bold mb-4">Total: ₱{order.orderPrice}</p>
             <button
               onClick={onClose}
               className="bg-white text-black font-bold font-montserrat py-2 px-6 rounded-md hover:text-white hover:bg-green-500"
