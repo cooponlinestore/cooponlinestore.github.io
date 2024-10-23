@@ -77,9 +77,9 @@ const AdminDashboard = () => {
   }, []);
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex flex-col lg:flex-row min-h-screen">
       {/* Sidebar */}
-      <aside className="bg-custom-gray w-64 flex flex-col justify-between p-4">
+      <aside className="bg-custom-gray w-full lg:w-64 flex flex-col justify-between p-4">
         <div>
           {/* Logo */}
           <div className="mb-8">
@@ -125,7 +125,7 @@ const AdminDashboard = () => {
         </header>
 
         {/* Dashboard Content */}
-        <section className="mt-8 grid grid-cols-2 gap-4">
+        <section className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-4">
           <button onClick={goToOrderManagement}>
           <div className="bg-white shadow-md p-4 rounded-lg">
             <h2 className="font-bold text-gray-600 mb-2">TOTAL ORDERS</h2>

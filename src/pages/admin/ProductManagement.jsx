@@ -8,6 +8,7 @@ import ProfileManagement from '../student/ProfileManagement';
 
 const ProductManagement = () => {
   const [products, setProducts] = useState([]);
+  const [selectedProductId, setSelectedProductId] = useState(null); // Toggle for mobile dropdown
   const [searchTerm, setSearchTerm] = useState("");
   const [filter, setFilter] = useState("all"); // Filter by stock status (all, in-stock, out-of-stock)
   const [showForm, setShowForm] = useState(false); // Show/hide the form modal
@@ -76,6 +77,11 @@ const ProductManagement = () => {
     setShowForm(true); // Show the form
   };
 
+  // Toggle product details in mobile view
+  const toggleProductDetails = (productId) => {
+    setSelectedProductId(selectedProductId === productId ? null : productId); // Toggle between showing/hiding
+  };
+
   // Filter products based on search and stock status
   const filteredProducts = products.filter(product => {
     const productName = product.name ? product.name.toLowerCase() : ""; // Safely access name
@@ -88,11 +94,10 @@ const ProductManagement = () => {
   });
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex flex-col lg:flex-row min-h-screen">
       {/* Sidebar */}
-      <aside className="bg-custom-gray w-64 flex flex-col justify-between p-4">
+      <aside className="bg-custom-gray w-full lg:w-64 flex flex-col justify-between p-4">
         <div>
-          {/* Logo */}
           <div className="mb-8">
             <img src="/coop.png" alt="Coop Online Logo" className="w-full h-20 object-contain mx-auto mb-24" />
           </div>
@@ -138,107 +143,114 @@ const ProductManagement = () => {
         <section className="mt-8 bg-white p-8 shadow-md rounded-md h-full">
           <div className='flex justify-between items-center'>
             <h2 className="text-2xl font-bold text-custom-gray mb-6">Manage Products</h2>
+
+{/* Add Products Button */}
+<button
+      onClick={() => { setShowForm(true); setEditingProductId(null); }}
+      className="border-4 border-custom-gray text-custom-gray font-bold rounded-md font-montserrat hover:bg-custom-gray hover:text-white px-6 py-2 w-full lg:w-auto lg:px-8 text-sm lg:text-base mt-4 lg:mt-0"
+    >
+      Add Products
+    </button>
+  </div>
+
+          {/* Table for desktop and dropdown for mobile */}
+          <table className="w-full bg-gray-300 shadow rounded-md table-fixed">
+  <thead className="hidden lg:table-header-group">
+    <tr className="bg-gray-300 text-center text-gray-600 font-semibold">
+      <th className="p-6 font-bold font-montserrat w-1/5">Name</th>
+      <th className="p-6 font-bold font-montserrat w-1/5">Category</th>
+      <th className="p-6 font-bold font-montserrat w-1/5">Price</th>
+      <th className="p-6 font-bold font-montserrat w-1/5">Quantity</th>
+      <th className="p-6 font-bold font-montserrat w-1/5">Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {filteredProducts.map((product) => (
+      <React.Fragment key={product.id}>
+        {/* Desktop view */}
+        <tr className="hidden lg:table-row bg-custom-gray border-b border-white text-center">
+          <td className="p-4 text-white">{product.name}</td>
+          <td className="p-4 text-white">{product.type}</td>
+          <td className="p-4 text-white">{product.price}</td>
+          <td className="p-4 text-white">{product.quantity}</td>
+          <td className="p-4 text-white">
             <button
-              onClick={() => { setShowForm(true); setEditingProductId(null); }}
-              className='border-4 border-custom-gray text-custom-gray w-1/6 font-bold rounded-md font-montserrat hover:bg-custom-gray hover:text-white'
+              onClick={() => handleEdit(product.id)}
+              className="bg-white text-custom-gray border-2 border-custom-gray py-1 px-3 rounded-full hover:bg-custom-dark hover:text-white"
             >
-              Add Products
+              Edit
             </button>
+            <button
+              onClick={() => handleDelete(product.id)}
+              className="bg-white text-red-600 border-2 border-red-600 py-1 px-3 rounded-full hover:bg-red-600 hover:text-white ml-2"
+            >
+              Delete
+            </button>
+          </td>
+        </tr>
+
+        {/* Mobile view - Name and dropdown */}
+        <tr className="lg:hidden flex flex-col mb-4 bg-custom-gray p-4 rounded-lg">
+          <div onClick={() => toggleProductDetails(product.id)} className="flex justify-between items-center">
+            <span className="text-white font-bold">{product.name}</span>
+            <Icon
+              icon={selectedProductId === product.id ? 'mdi:chevron-up' : 'mdi:chevron-down'}
+              className="text-white w-6 h-6 cursor-pointer"
+            />
           </div>
-          <table className="w-full bg-gray-300 shadow rounded-md flex flex-col">
-            <thead>
-              <tr className="bg-gray-300 text-center text-gray-600 font-semibold flex justify-evenly items-center">
-                <th className="p-6 font-bold font-montserrat w-1/5">Name</th>
-                <th className="p-6 font-bold font-montserrat w-1/5">Category</th>
-                <th className="p-6 font-bold font-montserrat w-1/5">Price</th>
-                <th className="p-6 font-bold font-montserrat w-1/5">Quantity</th>
-                <th className="p-6 font-bold font-montserrat w-1/5"></th>
-                <th className="p-6 font-bold font-montserrat w-1/5"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredProducts.map(product => (
-                <tr key={product.id} className="bg-custom-gray border-b border-white flex flex-row w-full">
-                  <td className="flex items-start justify-center p-4 text-white font-bold w-full h-full">
-                    <span className="bg-custom-gray font-bold text-white py-1 px-2 rounded-md">{product.name}</span>
-                  </td>
-                  <td className="flex items-start justify-center p-4 text-white font-bold w-full">
-                    <span className="bg-custom-gray font-bold text-white py-1 px-2 rounded-md">{product.type}</span>
-                  </td>
-                  <td className="flex items-start justify-center p-4 text-white font-bold w-full">
-                    <span className="bg-custom-gray font-bold text-white py-1 px-2 rounded-md">{product.price}</span>
-                  </td>
-                  <td className="flex items-start justify-center p-4 text-white font-bold w-full">
-                    <span className="bg-custom-gray font-bold text-white py-1 px-2 rounded-md">{product.quantity}</span>
-                  </td>
-                  <td className="flex flex-row items-start justify-center p-4 text-white font-bold w-full">
-                    <button
-                      onClick={() => handleEdit(product.id)}
-                      className="bg-white text-custom-gray border-2 border-custom-gray py-1 px-3 rounded-full hover:bg-custom-dark hover:text-white"
-                    >
-                      Edit
-                    </button>
-                  </td>
-                  <td className="flex flex-row items-start justify-center p-4 text-white font-bold w-full">
-                    <button
-                      onClick={() => handleDelete(product.id)}
-                      className="bg-white text-red-600 border-2 border-red-600 py-1 px-3 rounded-full hover:bg-red-600 hover:text-white"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+
+          {/* Toggle details */}
+          {selectedProductId === product.id && (
+            <div className="mt-4 bg-gray-100 p-4 rounded-lg">
+              <p>Category: {product.type}</p>
+              <p>Price: ₱{product.price}</p>
+              <p>Quantity: {product.quantity}</p>
+              <div className="mt-2">
+                <button
+                  onClick={() => handleEdit(product.id)}
+                  className="bg-white text-custom-gray border-2 border-custom-gray py-1 px-3 rounded-full hover:bg-custom-dark hover:text-white"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => handleDelete(product.id)}
+                  className="bg-white text-red-600 border-2 border-red-600 py-1 px-3 rounded-full hover:bg-red-600 hover:text-white ml-2"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          )}
+        </tr>
+      </React.Fragment>
+    ))}
+  </tbody>
+</table>
+
         </section>
 
-    {/* ProductForm Modal */}
-{showForm && (
-  <div className="fixed inset-0 bg-custom-gray bg-opacity-90 flex justify-center items-center z-50">
-    <div className="relative bg-white p-8 rounded-lg shadow-lg w-full max-w-lg">
-      
-      {/* Close Button */}
-      <button
-        className="absolute top-4 right-4 text-custom-gray font-bold text-xl hover:text-red-600 transition-colors duration-200"
-        onClick={() => setShowForm(false)}
-      >
-        &times;
-      </button>
+        {/* ProductForm Modal */}
+        {showForm && (
+          <div className="fixed inset-0 bg-custom-gray bg-opacity-90 flex justify-center items-center z-50">
+            <div className="relative bg-white p-8 rounded-lg shadow-lg w-full max-w-lg">
+              {/* Close Button */}
+              <button
+                className="absolute top-4 right-4 text-custom-gray font-bold text-xl hover:text-red-600 transition-colors duration-200"
+                onClick={() => setShowForm(false)}
+              >
+                &times;
+              </button>
 
-      {/* Modal Header */}
-      <h2 className="text-2xl font-montserrat font-extrabold text-custom-gray mb-6 text-center">
-        {editingProductId ? 'Edit Product' : 'Add Product'}
-      </h2>
+              {/* Modal Header */}
+              <h2 className="text-2xl font-montserrat font-extrabold text-custom-gray mb-6 text-center">
+                {editingProductId ? 'Edit Product' : 'Add Product'}
+              </h2>
 
-      {/* Product Form */}
-      <ProductForm
-        productId={editingProductId}
-        onClose={() => setShowForm(false)} // Close the form
-      />
-      
-      {/* Modal Footer: Action Buttons */}
-      <div className="mt-8 flex justify-end space-x-4">
-        <button
-          className="bg-gray-200 text-custom-gray font-bold py-2 px-6 rounded-md hover:bg-gray-300 transition-colors duration-200"
-          onClick={() => setShowForm(false)}
-        >
-          Cancel
-        </button>
-        <button
-          className="bg-AllMenu text-white font-bold py-2 px-6 rounded-md hover:bg-AllMenu-dark transition-colors duration-200"
-          onClick={() => {
-            // Handle form submission or any action needed
-          }}
-        >
-          {editingProductId ? 'Save Changes' : 'Add Product'}
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-
-
+              {/* Product Form */}
+              <ProductForm productId={editingProductId} onClose={() => setShowForm(false)} />
+            </div>
+          </div>
+        )}
       </main>
 
       {/* Sidebar for ProfileManagement */}

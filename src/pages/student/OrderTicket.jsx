@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { ref, onValue, update, database } from "../../firebase"; // Your Firebase setup
-import { useNavigate } from "react-router-dom";
+import { ref, onValue, database } from "../../firebase"; // Firebase setup
 
 const OrderTicket = ({ orderId, onClose }) => {
   const [order, setOrder] = useState(null);
-  const [timeLeft, setTimeLeft] = useState(""); // For countdown timer
-  const navigate = useNavigate();
+  const [timeLeft, setTimeLeft] = useState(""); // Countdown timer state
 
   // Fetch the order details from Firebase
   useEffect(() => {
@@ -44,11 +42,12 @@ const OrderTicket = ({ orderId, onClose }) => {
   }, [order]);
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-AllMenu text-white text-center p-8 rounded-md shadow-lg w-96">
-        <h2 className="text-2xl font-bold font-montserrat">Order Ticket</h2>
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+      <div className="bg-AllMenu text-white text-center p-6 rounded-md shadow-lg w-10/12 max-w-md mx-auto">
+        <h2 className="text-lg lg:text-xl font-bold font-montserrat">Order Ticket</h2>
         {order ? (
           <>
+<<<<<<< HEAD
             <p className="text-2xl mt-4 font-bold font-montserrat">#{orderId}</p>
             <p className="text-5xl font-bold font-montserrat my-4">{timeLeft}</p>
             {order.products.map((product, index) => (
@@ -57,15 +56,27 @@ const OrderTicket = ({ orderId, onClose }) => {
               </p>
             ))}
             <p className="text-3xl font-montserrat font-bold mb-4">Total: ₱{order.orderPrice}</p>
+=======
+            <p className="text-md lg:text-lg mt-4 font-bold font-montserrat">#{orderId}</p>
+            <p className="text-2xl lg:text-3xl font-bold font-montserrat my-4">{timeLeft}</p>
+            <div className="flex flex-col gap-2">
+              {order.products.map((product, index) => (
+                <p key={index} className="text-base lg:text-xl mb-2 lg:mb-4 font-bold font-montserrat">
+                  {product.name} (x{product.quantity})
+                </p>
+              ))}
+            </div>
+            <p className="text-xl lg:text-2xl font-montserrat font-bold mb-4">₱{order.orderPrice}</p>
+>>>>>>> 50ffa4906e0bb04791142e80b782aca743f924c2
             <button
               onClick={onClose}
-              className="bg-white text-black font-bold font-montserrat py-2 px-6 rounded-md hover:text-white hover:bg-green-500"
+              className="bg-white text-black font-bold font-montserrat py-2 px-4 lg:py-2 lg:px-6 rounded-md hover:text-white hover:bg-green-500 transition-colors"
             >
               Close
             </button>
           </>
         ) : (
-          <p className="text-4xl mt-4 font-bold font-montserrat">Order not found</p>
+          <p className="text-lg lg:text-2xl mt-4 font-bold font-montserrat">Order not found</p>
         )}
       </div>
     </div>

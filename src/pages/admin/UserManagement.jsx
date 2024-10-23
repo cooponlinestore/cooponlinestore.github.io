@@ -3,8 +3,10 @@ import { ref, onValue, remove } from "firebase/database"; // Import from Firebas
 import { database, logout } from "../../firebase"; // Import the Realtime Database instance
 import { Icon } from '@iconify/react';
 import { useNavigate } from "react-router-dom";
+
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
+  const [selectedUserId, setSelectedUserId] = useState(null); // For mobile view
 
   const navigate = useNavigate();
 
@@ -20,17 +22,16 @@ const UserManagement = () => {
     navigate("/admin/orders"); // Navigate to the Order Management page
   };
 
-
   const handleLogout = async () => {
     await logout(); // Call the logout function
     navigate("/login"); // Redirect to login page after logout
   };
 
-   // Toggle Profile Sidebar
-   const [isProfileOpen, setIsProfileOpen] = useState(false);
-   const toggleProfileSidebar = () => {
-     setIsProfileOpen((prevState) => !prevState); // Toggle sidebar state
-   };
+  // Toggle Profile Sidebar
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const toggleProfileSidebar = () => {
+    setIsProfileOpen((prevState) => !prevState); // Toggle sidebar state
+  };
 
   // Fetch users from Firebase Realtime Database
   useEffect(() => {
@@ -67,19 +68,33 @@ const UserManagement = () => {
     }
   };
 
+  // Toggle user details in mobile view
+  const toggleUserDetails = (userId) => {
+    setSelectedUserId(selectedUserId === userId ? null : userId); // Toggle between showing/hiding
+  };
+
+  // Function to format the email with a <br /> before '@'
+  const formatEmailForMobile = (email) => {
+    const parts = email.split("@");
+    return (
+      <>
+        {parts[0]}<br />@{parts[1]}
+      </>
+    );
+  };
+
   return (
-    <div className="flex min-h-screen">
+    <div className="flex flex-col lg:flex-row min-h-screen">
       {/* Sidebar */}
-      <aside className="bg-custom-gray w-64 flex flex-col justify-between p-4">
+      <aside className="bg-custom-gray w-full lg:w-64 flex flex-col justify-between p-4">
         <div>
-          {/* Logo */}
           <div className="mb-8">
             <img src="/coop.png" alt="Coop Online Logo" className="w-full h-20 object-contain mx-auto mb-24" />
           </div>
 
           {/* Menu Items */}
           <nav className="space-y-8">
-            <button onClick={goToAdminDashBoard} className="flex items-center space-x-2 text-white py-2 px-3 hover:bg-white hover:text-custom-gray rounded-md w-full font-bold font-montserrat">
+            <button onClick={goToAdminDashBoard} className="flex items-center space-x-2 text-white hover:bg-white hover:text-custom-gray py-2 px-3 rounded-md w-full font-bold font-montserrat">
               <Icon icon="carbon:dashboard" className="w-6 h-6" />
               <span>Dashboard</span>
             </button>
@@ -108,7 +123,7 @@ const UserManagement = () => {
         <header className="flex justify-end items-center bg-custom-gray p-4 rounded-md">
           <div className="flex items-center justify-center space-x-4">
             <Icon icon="ic:baseline-notifications" className="text-white w-8 h-8" />
-            <button>
+            <button onClick={toggleProfileSidebar}>
               <Icon icon="ic:baseline-account-circle" className="text-white w-8 h-8" />
             </button>
           </div>
@@ -117,15 +132,15 @@ const UserManagement = () => {
         {/* User Management Table */}
         <section className="mt-8 bg-white p-8 shadow-md rounded-md h-full">
           <h2 className="text-2xl font-bold text-custom-gray mb-6">User Management</h2>
-          <table className="w-full bg-gray-300 shadow rounded-md flex flex-col">
-            <thead>
-              <tr className="bg-gray-300 text-center text-gray-600 font-semibold flex justify-evenly items-center">
-                <th className="p-6 font-bold font-montserrat w-1/9">Name</th>
-                <th className="p-6 font-bold font-montserrat w-1/6">Email</th>
+          <table className="w-full bg-gray-300 shadow rounded-md table-fixed">
+            <thead className="hidden lg:table-header-group">
+              <tr className="bg-gray-300 text-center text-gray-600 font-semibold">
+                <th className="p-6 font-bold font-montserrat w-1/6">Name</th>
+                <th className="p-6 font-bold font-montserrat w-1/4">Email</th>
                 <th className="p-6 font-bold font-montserrat w-1/7">Program</th>
-                <th className="p-6 font-bold font-montserrat w-1/7">Section</th>
-                <th className="p-6 font-bold font-montserrat w-1/7">Year</th>
-                <th className="p-6 font-bold font-montserrat w-1/7">Actions</th>
+                <th className="p-6 font-bold font-montserrat w-1/9">Section</th>
+                <th className="p-6 font-bold font-montserrat w-1/9">Year</th>
+                <th className="p-6 font-bold font-montserrat w-1/8">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -137,31 +152,53 @@ const UserManagement = () => {
                 </tr>
               ) : (
                 users.map((user) => (
-                  <tr key={user.userId} className="bg-custom-gray border-b border-white flex flex-row w-full">
-                    <td className="flex items-start justify-center p-4 text-white font-bold w-full h-full">
-                      <span className="bg-custom-gray font-bold text-white py-1 px-2 rounded-md">{user.name}</span>
-                    </td>
-                    <td className="flex items-start justify-center p-4 text-white font-bold w-full">
-                      <span className="bg-custom-gray font-bold text-white py-1 px-2 rounded-md">{user.email}</span>
-                    </td>
-                    <td className="flex items-start justify-center p-4 text-white font-bold w-full">
-                      <span className="bg-custom-gray font-bold text-white py-1 px-2 rounded-md">{user.program}</span>
-                    </td>
-                    <td className="flex items-start justify-center p-4 text-white font-bold w-full">
-                      <span className="bg-custom-gray font-bold text-white py-1 px-2 rounded-md">{user.section}</span>
-                    </td>
-                    <td className="flex items-start justify-center p-4 text-white font-bold w-full">
-                      <span className="bg-custom-gray font-bold text-white py-1 px-2 rounded-md">{user.year}</span>
-                    </td>
-                    <td className="flex flex-row items-start justify-center p-4 text-white font-bold w-full">
-                      <button
-                        onClick={() => handleDeleteUser(user.userId)}
-                        className="bg-red-600 text-white py-1 px-3 rounded-full hover:bg-red-700"
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
+                  <React.Fragment key={user.userId}>
+                    {/* Desktop view */}
+                    <tr className="hidden lg:table-row bg-custom-gray border-b border-white text-center">
+                      <td className="p-4 text-white">{user.name}</td>
+                      <td className="p-4 text-white">{user.email}</td> {/* Normal display for desktop */}
+                      <td className="p-4 text-white">{user.program}</td>
+                      <td className="p-4 text-white">{user.section}</td>
+                      <td className="p-4 text-white">{user.year}</td>
+                      <td className="p-4 text-white">
+                        <button
+                          onClick={() => handleDeleteUser(user.userId)}
+                          className="bg-white text-red-600 border-2 border-red-600 py-1 px-3 rounded-full hover:bg-red-600 hover:text-white"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+
+                    {/* Mobile view - Name and dropdown */}
+                    <tr className="lg:hidden flex flex-col mb-4 bg-custom-gray p-4 rounded-lg">
+                      <div onClick={() => toggleUserDetails(user.userId)} className="flex justify-between items-center">
+                        <span className="text-white font-bold">{user.name}</span>
+                        <Icon
+                          icon={selectedUserId === user.userId ? 'mdi:chevron-up' : 'mdi:chevron-down'}
+                          className="text-white w-6 h-6 cursor-pointer"
+                        />
+                      </div>
+
+                      {/* Toggle details */}
+                      {selectedUserId === user.userId && (
+                        <div className="mt-4 bg-gray-100 p-4 rounded-lg">
+                          <p>Email: {formatEmailForMobile(user.email)}</p> {/* Email format with <br /> */}
+                          <p>Program: {user.program}</p>
+                          <p>Section: {user.section}</p>
+                          <p>Year: {user.year}</p>
+                          <div className="mt-2">
+                            <button
+                              onClick={() => handleDeleteUser(user.userId)}
+                              className="bg-red-600 text-white py-1 px-3 rounded-full hover:bg-red-700"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </tr>
+                  </React.Fragment>
                 ))
               )}
             </tbody>
