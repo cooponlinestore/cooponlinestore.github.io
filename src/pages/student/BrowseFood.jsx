@@ -6,6 +6,7 @@ import ProfileManagement from "./ProfileManagement";
 import OrderTicket from "./OrderTicket";
 import { Icon } from "@iconify/react";
 
+
 const BrowseFood = () => {
   const [foodItems, setFoodItems] = useState([]);
   const [cart, setCart] = useState([]);
@@ -408,7 +409,7 @@ const BrowseFood = () => {
             <div className="text-center">
               <button
                 onClick={handleDownloadQrCode}
-                className="bg-blue-600 text-black py-2 px-4 rounded-md"
+                className="bg-blue-600 text-black py-2 px-4 rounded-md border-4 border-black"
               >
                 Download QR Code
               </button>
