@@ -47,18 +47,8 @@ const OrderTicket = ({ orderId, onClose }) => {
         <h2 className="text-lg lg:text-xl font-bold font-montserrat">Order Ticket</h2>
         {order ? (
           <>
-<<<<<<< HEAD
-            <p className="text-2xl mt-4 font-bold font-montserrat">#{orderId}</p>
-            <p className="text-5xl font-bold font-montserrat my-4">{timeLeft}</p>
-            {order.products.map((product, index) => (
-              <p key={index} className="text-4xl mb-4 font-bold font-montserrat">
-                {product.name} (x{product.quantity})
-              </p>
-            ))}
-            <p className="text-3xl font-montserrat font-bold mb-4">Total: ₱{order.orderPrice}</p>
-=======
-            <p className="text-md lg:text-lg mt-4 font-bold font-montserrat">#{orderId}</p>
-            <p className="text-2xl lg:text-3xl font-bold font-montserrat my-4">{timeLeft}</p>
+            <p className="text-2xl mt-4 font-bold font-montserrat">Ticket #{order.ticketNumber}</p> {/* Show the ticket number */}
+            <p className="text-5xl font-bold font-montserrat my-4">{timeLeft}</p> {/* Countdown Timer */}
             <div className="flex flex-col gap-2">
               {order.products.map((product, index) => (
                 <p key={index} className="text-base lg:text-xl mb-2 lg:mb-4 font-bold font-montserrat">
@@ -66,8 +56,7 @@ const OrderTicket = ({ orderId, onClose }) => {
                 </p>
               ))}
             </div>
-            <p className="text-xl lg:text-2xl font-montserrat font-bold mb-4">₱{order.orderPrice}</p>
->>>>>>> 50ffa4906e0bb04791142e80b782aca743f924c2
+            <p className="text-xl lg:text-2xl font-montserrat font-bold mb-4">Total: ₱{order.orderPrice}</p> {/* Total Price */}
             <button
               onClick={onClose}
               className="bg-white text-black font-bold font-montserrat py-2 px-4 lg:py-2 lg:px-6 rounded-md hover:text-white hover:bg-green-500 transition-colors"
