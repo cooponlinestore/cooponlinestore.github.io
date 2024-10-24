@@ -21,7 +21,7 @@ const OrderTicket = ({ orderId, onClose }) => {
 
   // Calculate the time left for pickup (15 minutes timer in minutes and seconds)
   useEffect(() => {
-    if (order && order.orderTime) {
+    if (order && order.orderTime && order.status !== 'completed') {
       const interval = setInterval(() => {
         const orderTimestamp = new Date(order.orderTime).getTime();
         const now = new Date().getTime();
@@ -38,6 +38,9 @@ const OrderTicket = ({ orderId, onClose }) => {
       }, 1000);
 
       return () => clearInterval(interval); // Cleanup interval on unmount
+    }
+    if (order && order.status === 'completed') {
+      setTimeLeft("Order Completed");
     }
   }, [order]);
 
@@ -65,7 +68,7 @@ const OrderTicket = ({ orderId, onClose }) => {
             </button>
           </>
         ) : (
-          <p className="text-lg lg:text-2xl mt-4 font-bold font-montserrat">Order not found</p>
+          <button onClick={onClose} className="text-lg lg:text-2xl mt-4 font-bold font-montserrat">Order not found</button>
         )}
       </div>
     </div>
