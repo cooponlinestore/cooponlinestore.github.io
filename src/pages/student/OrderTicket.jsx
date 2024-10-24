@@ -21,7 +21,7 @@ const OrderTicket = ({ orderId, onClose }) => {
 
   // Calculate the time left for pickup (15 minutes timer in minutes and seconds)
   useEffect(() => {
-    if (order && order.orderTime) {
+    if (order && order.orderTime && order.status !== 'completed') {
       const interval = setInterval(() => {
         const orderTimestamp = new Date(order.orderTime).getTime();
         const now = new Date().getTime();
@@ -39,6 +39,9 @@ const OrderTicket = ({ orderId, onClose }) => {
 
       return () => clearInterval(interval); // Cleanup interval on unmount
     }
+    if (order && order.status === 'completed') {
+      setTimeLeft("Order Completed");
+    }
   }, [order]);
 
   return (
@@ -47,8 +50,8 @@ const OrderTicket = ({ orderId, onClose }) => {
         <h2 className="text-lg lg:text-xl font-bold font-montserrat">Order Ticket</h2>
         {order ? (
           <>
-            <p className="text-md lg:text-lg mt-4 font-bold font-montserrat">#{orderId}</p>
-            <p className="text-2xl lg:text-3xl font-bold font-montserrat my-4">{timeLeft}</p>
+            <p className="text-2xl mt-4 font-bold font-montserrat">Ticket #{order.ticketNumber}</p> {/* Show the ticket number */}
+            <p className="text-5xl font-bold font-montserrat my-4">{timeLeft}</p> {/* Countdown Timer */}
             <div className="flex flex-col gap-2">
               {order.products.map((product, index) => (
                 <p key={index} className="text-base lg:text-xl mb-2 lg:mb-4 font-bold font-montserrat">
@@ -56,7 +59,7 @@ const OrderTicket = ({ orderId, onClose }) => {
                 </p>
               ))}
             </div>
-            <p className="text-xl lg:text-2xl font-montserrat font-bold mb-4">₱{order.orderPrice}</p>
+            <p className="text-xl lg:text-2xl font-montserrat font-bold mb-4">Total: ₱{order.orderPrice}</p> {/* Total Price */}
             <button
               onClick={onClose}
               className="bg-white text-black font-bold font-montserrat py-2 px-4 lg:py-2 lg:px-6 rounded-md hover:text-white hover:bg-green-500 transition-colors"
@@ -65,7 +68,7 @@ const OrderTicket = ({ orderId, onClose }) => {
             </button>
           </>
         ) : (
-          <p className="text-lg lg:text-2xl mt-4 font-bold font-montserrat">Order not found</p>
+          <button onClick={onClose} className="text-lg lg:text-2xl mt-4 font-bold font-montserrat">Order not found</button>
         )}
       </div>
     </div>

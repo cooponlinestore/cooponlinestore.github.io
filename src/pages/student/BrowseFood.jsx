@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { ref, onValue, push } from "../../firebase"; // Import push for saving data to Firebase
-import { database, getAuth, logout } from "../../firebase"; // Assuming firebase.js is setup correctly
+import { ref, onValue, push } from "../../firebase"; // Import Firebase operations
+import { database, getAuth, logout } from "../../firebase";
 import { useNavigate } from "react-router-dom";
 import ProfileManagement from "./ProfileManagement";
 import OrderTicket from "./OrderTicket";
@@ -12,12 +12,12 @@ const BrowseFood = () => {
   const [cart, setCart] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("All");
-  const [totalAmount, setTotalAmount] = useState(0); // Total amount state
+  const [totalAmount, setTotalAmount] = useState(0);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("");
-  const [gcashModalVisible, setGcashModalVisible] = useState(false); // For GCash modal visibility
-  const user = getAuth().currentUser; // Get the current authenticated user
-  const [isOrderTicketOpen, setIsOrderTicketOpen] = useState(false); // State to control OrderTicket visibility at the bottom
-  const [currentOrderId, setCurrentOrderId] = useState(null); // State to track current order
+  const [gcashModalVisible, setGcashModalVisible] = useState(false);
+  const user = getAuth().currentUser;
+  const [isOrderTicketOpen, setIsOrderTicketOpen] = useState(false);
+  const [currentOrderId, setCurrentOrderId] = useState(null);
   const navigate = useNavigate();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
@@ -25,18 +25,20 @@ const BrowseFood = () => {
   const gcashQrCode = "/gcashqr.png"; // Path to the GCash QR Code image
 
   const handleLogout = async () => {
-    await logout(); // Call the logout function
-    navigate("/login"); // Redirect to login page after logout
+    await logout();
+    navigate("/login");
   };
 
-  // Toggle Profile Sidebar
   const toggleProfileSidebar = () => {
-    setIsProfileOpen((prevState) => !prevState); // Toggle sidebar state
+    setIsProfileOpen((prevState) => !prevState);
   };
 
-  // Toggle Order Ticket at the bottom
   const toggleOrderTicket = () => {
-    setIsOrderTicketOpen((prevState) => !prevState); // Toggle order ticket visibility
+    setIsOrderTicketOpen((prevState) => !prevState);
+  };
+
+  const generateTicketNumber = () => {
+    return Math.floor(1000 + Math.random() * 9000); // Random 4-digit number
   };
 
   // Fetch food items from Firebase Realtime Database
@@ -81,7 +83,7 @@ const BrowseFood = () => {
 
   // Update item quantity
   const updateCartQuantity = (id, quantity) => {
-    if (quantity <= 0) return removeFromCart(id); // Remove if quantity goes below 1
+    if (quantity <= 0) return removeFromCart(id);
     setCart((prevCart) =>
       prevCart.map((item) =>
         item.id === id ? { ...item, quantity: quantity } : item
@@ -121,34 +123,34 @@ const BrowseFood = () => {
       return;
     }
 
-    if (selectedPaymentMethod === "Gcash") {
-      setGcashModalVisible(true); // Show GCash modal
-    }
+    const ticketNumber = generateTicketNumber();
 
     const order = {
-      customerId: user.uid, // The currently logged-in user
-      products: cart.map(({ name, price, quantity }) => ({
-        name,
-        price,
-        quantity,
-      })),
+      customerId: user.uid,
+      products: cart.map(({ name, price, quantity }) => ({ name, price, quantity })),
       orderPrice: totalAmount,
-      orderTime: new Date().toISOString(), // Order time is the current time
+      orderTime: new Date().toISOString(),
       paymentMethod: selectedPaymentMethod,
-      status: "pending", // Default status is Pending
+      status: "pending",
+      ticketNumber: ticketNumber,
+      timerExpiration: Date.now() + 15 * 60 * 1000, // 15 minutes from now
     };
 
     try {
-      // Save the order to Firebase Realtime Database
       const ordersRef = ref(database, "orders");
-      const newOrderRef = await push(ordersRef, order); // Push the order to the database
-      const newOrderId = newOrderRef.key; // Get the order ID
-      setCurrentOrderId(newOrderId); // Set the current order ID to show the order ticket
-      setIsOrderTicketOpen(true); // Open the order ticket at the bottom
-      alert("Order placed successfully!");
+      const newOrderRef = await push(ordersRef, order);
+      const newOrderId = newOrderRef.key;
+      setCurrentOrderId(newOrderId); // Save the order ID to show the ticket
+      setIsOrderTicketOpen(true); // Open the order ticket modal
 
-      // Reset cart after successful checkout
-      setCart([]);
+      // Show GCash modal if GCash payment is selected
+      if (selectedPaymentMethod === "Gcash") {
+        setGcashModalVisible(true);
+      } else {
+        alert("Order placed successfully!");
+      }
+
+      setCart([]); // Clear cart after successful order
     } catch (error) {
       console.error("Error placing order:", error);
       alert("Failed to place order. Please try again.");
@@ -196,187 +198,177 @@ const BrowseFood = () => {
       </header>
 
       {/* Main Content */}
-<main className="flex flex-col lg:flex-row gap-4 p-4 bg-gray-200 font-montserrat min-w-full">
-  {/* Left Section: Product Menu and Product List */}
-  <div className="w-full lg:w-5/5 bg-gray-200 p-4 rounded-lg shadow">
-    {/* Product Menu */}
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      {categories.map((category) => (
-        <div
-          key={category}
-          className="p-4 w-full h-36 border-2 rounded-md shadow-md border-gray-100 text-center flex flex-col justify-center items-center bg-white cursor-pointer"
-          onClick={() => setFilterType(category)}
-        >
-          <Icon
-            icon={
-              category === "Beverages"
-                ? "icon-park-outline:bottle-two"
-                : category === "Snacks"
-                ? "lucide:popcorn"
-                : "fluent:cookies-16-regular"
-            }
-            className={`h-16 w-16 mx-auto ${
-              category === "Beverages"
-                ? "text-Drinks"
-                : category === "Snacks"
-                ? "text-Snacks"
-                : "text-Biscuits"
-            } mb-1`}
-          />
-          <span
-            className={`${
-              category === "Beverages"
-                ? "text-Drinks"
-                : category === "Snacks"
-                ? "text-Snacks"
-                : "text-Biscuits"
-            } font-semibold font-montserrat`}
-          >
-            {category}
-          </span>
-        </div>
-      ))}
-    </div>
-
-    {/* Product List */}
-    <h2 className="text-lg font-bold mb-4 mt-6">Products</h2>
-    <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 bg-gray-200">
-  {filterFoodItems().map((item) => (
-    <button
-      onClick={() => addToCart(item)}
-      key={item.id}
-      className="flex flex-col items-center p-4 bg-Cardbg rounded-sm lg:flex-row lg:justify-between"
-    >
-      <img
-        src={item.image}
-        alt={item.name}
-        className="w-16 h-16 object-contain"
-      />
-      <div className="flex flex-col items-center lg:flex-1 lg:items-start lg:px-4">
-        <h3 className="font-bold">{item.name}</h3>
-        <p className="text-sm text-black text-center lg:text-left">{item.description}</p>
-      </div>
-      <span className="font-bold text-AllMenu lg:ml-auto">₱{item.price}</span>
-    </button>
-  ))}
-</div>
-
-  </div>
-
-  {/* Right Section: Billing Section */}
-  <div className="w-full lg:w-2/5 bg-white p-4 rounded-lg shadow-md">
-    {/* Header Section */}
-    <div className="flex justify-between items-center mb-4">
-      <h2 className="text-lg font-extrabold">Billing Section</h2>
-      {/* Customer Button */}
-      <div className="border-2 border-custom-gray font-bold flex items-center px-4 py-2 rounded-sm">
-        <Icon
-          icon="stash:people-group"
-          className="h-6 w-6 mr-2 text-custom-gray"
-        />
-        <span className="text-custom-gray">Customer</span>
-      </div>
-    </div>
-
-    {/* Table Header */}
-    <div className="grid grid-cols-[2fr_2fr_1fr_0.5fr] gap-2 text-center font-semibold text-sm mb-2">
-      <span>Item</span>
-      <span className="ml-7">Qty</span>
-      <span>Price</span>
-      <span>Delete</span>
-    </div>
-
-    {/* Product List in Cart */}
-    <div className="flex flex-col gap-4 overflow-y-auto h-auto">
-      {cart.length === 0 ? (
-        <p>No items in cart</p>
-      ) : (
-        cart.map((cartItem) => (
-          <div
-            key={cartItem.id}
-            className="flex items-center justify-between py-2 border-t"
-          >
-            <div className="flex items-center min-w-40">
-              <img
-                src={cartItem.image}
-                alt={cartItem.name}
-                className="w-12 h-12 object-contain mr-2"
-              />
-              <div>
-                <h3 className="font-semibold">{cartItem.name}</h3>
-                <p className="text-sm text-gray-500">{cartItem.description}</p>
+      <main className="flex flex-col lg:flex-row gap-4 p-4 bg-gray-200 font-montserrat min-w-full">
+        {/* Left Section: Product Menu and Product List */}
+        <div className="w-full lg:w-5/5 bg-gray-200 p-4 rounded-lg shadow">
+          {/* Product Menu */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {categories.map((category) => (
+              <div
+                key={category}
+                className="p-4 w-full h-36 border-2 rounded-md shadow-md border-gray-100 text-center flex flex-col justify-center items-center bg-white cursor-pointer"
+                onClick={() => setFilterType(category)}
+              >
+                <Icon
+                  icon={
+                    category === "Beverages"
+                      ? "icon-park-outline:bottle-two"
+                      : category === "Snacks"
+                      ? "lucide:popcorn"
+                      : "fluent:cookies-16-regular"
+                  }
+                  className={`h-16 w-16 mx-auto ${
+                    category === "Beverages"
+                      ? "text-Drinks"
+                      : category === "Snacks"
+                      ? "text-Snacks"
+                      : "text-Biscuits"
+                  } mb-1`}
+                />
+                <span
+                  className={`${
+                    category === "Beverages"
+                      ? "text-Drinks"
+                      : category === "Snacks"
+                      ? "text-Snacks"
+                      : "text-Biscuits"
+                  } font-semibold font-montserrat`}
+                >
+                  {category}
+                </span>
               </div>
-            </div>
+            ))}
+          </div>
 
-            <div className="flex items-center justify-center">
+          {/* Product List */}
+          <h2 className="text-lg font-bold mb-4 mt-6">Products</h2>
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 bg-gray-200">
+            {filterFoodItems().map((item) => (
               <button
-                onClick={() => updateCartQuantity(cartItem.id, cartItem.quantity - 1)}
-                className="text-center w-8 h-8 px-2 py-1 border border-gray-300"
+                onClick={() => addToCart(item)}
+                key={item.id}
+                className="flex flex-col items-center p-4 bg-Cardbg rounded-sm lg:flex-row lg:justify-between"
               >
-                -
+                <img src={item.image} alt={item.name} className="w-16 h-16 object-contain" />
+                <div className="flex flex-col items-center lg:flex-1 lg:items-start lg:px-4">
+                  <h3 className="font-bold">{item.name}</h3>
+                  <p className="text-sm text-black text-center lg:text-left">{item.description}</p>
+                </div>
+                <span className="font-bold text-AllMenu lg:ml-auto">₱{item.price}</span>
               </button>
-              <input
-                type="text"
-                value={cartItem.quantity}
-                className="w-8 h-8 text-center border-t border-b border-gray-300"
-                readOnly
-              />
-              <button
-                onClick={() => updateCartQuantity(cartItem.id, cartItem.quantity + 1)}
-                className="text-center w-8 h-8 px-2 py-1 border border-gray-300"
-              >
-                +
-              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Right Section: Billing Section */}
+        <div className="w-full lg:w-2/5 bg-white p-4 rounded-lg shadow-md">
+          {/* Header Section */}
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-extrabold">Billing Section</h2>
+            <div className="border-2 border-custom-gray font-bold flex items-center px-4 py-2 rounded-sm">
+              <Icon icon="stash:people-group" className="h-6 w-6 mr-2 text-custom-gray" />
+              <span className="text-custom-gray">Customer</span>
             </div>
+          </div>
 
-            <span className="text-orange-500 font-bold text-center">
-              ₱{cartItem.price}
-            </span>
+          {/* Table Header */}
+          <div className="grid grid-cols-[2fr_2fr_1fr_0.5fr] gap-2 text-center font-semibold text-sm mb-2">
+            <span>Item</span>
+            <span className="ml-7">Qty</span>
+            <span>Price</span>
+            <span>Delete</span>
+          </div>
 
+          {/* Product List in Cart */}
+          <div className="flex flex-col gap-4 overflow-y-auto h-auto">
+            {cart.length === 0 ? (
+              <p>No items in cart</p>
+            ) : (
+              cart.map((cartItem) => (
+                <div
+                  key={cartItem.id}
+                  className="flex items-center justify-between py-2 border-t"
+                >
+                  <div className="flex items-center min-w-40">
+                    <img
+                      src={cartItem.image}
+                      alt={cartItem.name}
+                      className="w-12 h-12 object-contain mr-2"
+                    />
+                    <div>
+                      <h3 className="font-semibold">{cartItem.name}</h3>
+                      <p className="text-sm text-gray-500">{cartItem.description}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-center">
+                    <button
+                      onClick={() => updateCartQuantity(cartItem.id, cartItem.quantity - 1)}
+                      className="text-center w-8 h-8 px-2 py-1 border border-gray-300"
+                    >
+                      -
+                    </button>
+                    <input
+                      type="text"
+                      value={cartItem.quantity}
+                      className="w-8 h-8 text-center border-t border-b border-gray-300"
+                      readOnly
+                    />
+                    <button
+                      onClick={() => updateCartQuantity(cartItem.id, cartItem.quantity + 1)}
+                      className="text-center w-8 h-8 px-2 py-1 border border-gray-300"
+                    >
+                      +
+                    </button>
+                  </div>
+
+                  <span className="text-orange-500 font-bold text-center">
+                    ₱{cartItem.price}
+                  </span>
+
+                  <button
+                    onClick={() => removeFromCart(cartItem.id)}
+                    className="text-red-500 text-center"
+                  >
+                    <Icon icon="mdi:trash-can-outline" className="h-6 w-6" />
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Total Amount */}
+          <div className="mt-4 flex justify-between items-center">
+            <span className="text-lg font-bold">Total:</span>
+            <span className="text-lg font-bold">₱{totalAmount}</span>
+          </div>
+
+          <div className="mt-4 flex gap-2">
             <button
-              onClick={() => removeFromCart(cartItem.id)}
-              className="text-red-500 text-center"
+              onClick={() => setSelectedPaymentMethod("Gcash")}
+              className="flex items-center justify-evenly bg-gray-200 text-blue py-2 px-4 font-extrabold rounded-md h-16 w-full"
             >
-              <Icon icon="mdi:trash-can-outline" className="h-6 w-6" />
+              <img src="/gcash.png" alt="GCash" className="w-8 h-8" />
+              Gcash
+            </button>
+            <button
+              onClick={() => setSelectedPaymentMethod("Pay at Counter")}
+              className="bg-white text-[#FF9900] py-2 px-4 rounded-md h-16 w-full border font-extrabold border-AllMenu"
+            >
+              Pay at Counter
             </button>
           </div>
-        ))
-      )}
-    </div>
 
-    {/* Total Amount */}
-    <div className="mt-4 flex justify-between items-center">
-      <span className="text-lg font-bold">Total:</span>
-      <span className="text-lg font-bold">₱{totalAmount}</span>
-    </div>
+          <p className="mt-4">Selected Payment Method: {selectedPaymentMethod}</p>
 
-    <div className="mt-4 flex gap-2">
-      <button
-        onClick={() => setSelectedPaymentMethod("Gcash")}
-        className="flex items-center justify-evenly bg-gray-200 text-blue py-2 px-4 font-extrabold rounded-md h-16 w-full"
-      >
-        <img src="/gcash.png" alt="GCash" className="w-8 h-8" />
-        Gcash
-      </button>
-      <button
-        onClick={() => setSelectedPaymentMethod("Pay at Counter")}
-        className="bg-white text-[#FF9900] py-2 px-4 rounded-md h-16 w-full border font-extrabold border-AllMenu"
-      >
-        Pay at Counter
-      </button>
-    </div>
-
-    <p className="mt-4">Selected Payment Method: {selectedPaymentMethod}</p>
-
-    <button
-      onClick={handleCheckout}
-      className="bg-custom-dark text-white py-2 px-4 rounded-md mt-4 w-full font-bold"
-    >
-      Checkout
-    </button>
-  </div>
-</main>
-
+          <button
+            onClick={handleCheckout}
+            className="bg-custom-dark text-white py-2 px-4 rounded-md mt-4 w-full font-bold"
+          >
+            Checkout
+          </button>
+        </div>
+      </main>
 
       {/* Sidebar for ProfileManagement */}
       {isProfileOpen && <ProfileManagement onClose={toggleProfileSidebar} />}
@@ -430,7 +422,7 @@ const BrowseFood = () => {
       {isOrderTicketOpen && currentOrderId && (
         <OrderTicket
           orderId={currentOrderId}
-          onClose={toggleOrderTicket} // Close Order Ticket
+          onClose={toggleOrderTicket}
         />
       )}
     </div>

@@ -41,21 +41,40 @@ const OrderManagement = () => {
   };
 
   // Fetch all orders in real-time from Firebase Realtime Database
+  // Check for expired orders
   useEffect(() => {
-    const ordersRef = ref(database, 'orders/');
+    const ordersRef = ref(database, 'orders');
     const unsubscribe = onValue(ordersRef, (snapshot) => {
       const ordersData = snapshot.val();
-      const orderList = ordersData
-        ? Object.keys(ordersData).map((key) => ({
-            id: key, // Order ID
-            ...ordersData[key],
-          }))
-        : [];
-      setOrders(orderList);
+      const currentTime = Date.now();
+      
+      const updatedOrders = Object.keys(ordersData).map((key) => {
+        const order = ordersData[key];
+        
+        // Automatically cancel the order if the timer has expired and status is still pending
+        if (order.timerExpiration && currentTime > order.timerExpiration && order.status === 'pending') {
+          const orderRef = ref(database, `orders/${key}`);
+          update(orderRef, { status: 'canceled' });
+        }
+        
+        return { id: key, ...order };
+      });
+      
+      setOrders(updatedOrders); // Set the updated orders in the state
     });
 
-    return () => unsubscribe(); // Cleanup listener on unmount
+    return () => unsubscribe(); // Cleanup the listener on component unmount
   }, []);
+
+  // Mark the order as completed
+  const handleCompleteOrder = (orderId) => {
+    const orderRef = ref(database, `orders/${orderId}`);
+    update(orderRef, { status: 'completed' }).then(() => {
+      console.log(`Order ${orderId} marked as completed.`);
+    }).catch((error) => {
+      console.error('Error marking order as completed:', error);
+    });
+  };
 
   // Handle order status update
   const handleStatusUpdate = async (orderId, newStatus) => {
@@ -96,16 +115,25 @@ const OrderManagement = () => {
   };
 
   // Function to calculate time remaining for pickup (15 minutes timer)
-const calculateTimeRemaining = (orderTime) => {
-  if (!orderTime) return "No time provided";
+  const calculateTimeRemaining = (orderTime, orderStatus) => {
+    if (orderStatus === "completed" || orderStatus === "canceled") {
+      return " ";
+    }
 
-  const orderTimestamp = new Date(orderTime).getTime();
-  const now = new Date().getTime();
-  const timeDifference = now - orderTimestamp;
-  const minutesLeft = 15 - Math.floor(timeDifference / 60000); // Convert milliseconds to minutes
-
-  return minutesLeft > 0 ? `${minutesLeft} min left` : "Expired";
-};
+    const expirationTime = new Date(orderTime).getTime() + 15 * 60 * 1000; // Add 15 minutes
+    const now = Date.now();
+    const timeLeft = expirationTime - now;
+  
+    if (timeLeft <= 0) {
+      return "Expired";
+    }
+  
+    const minutesLeft = Math.floor(timeLeft / 60000);
+    const secondsLeft = Math.floor((timeLeft % 60000) / 1000);
+  
+    return `${minutesLeft} min ${secondsLeft < 10 ? `0${secondsLeft}` : secondsLeft} sec left`;
+  };
+  
 
   return (
     <div className="flex flex-col lg:flex-row min-h-screen">
@@ -184,7 +212,7 @@ const calculateTimeRemaining = (orderTime) => {
                   className="p-4 bg-gray-200 cursor-pointer"
                   onClick={() => toggleDropdown(order.id)}
                 >
-                  <span className="font-bold text-lg">Order ID: {order.id}</span>
+                  <span className="font-bold text-lg">Ticket Number: {order.ticketNumber}</span>
                 </div>
                 {openDropdown === order.id && (
                   <div className="p-4 bg-gray-100 transition-all duration-500">
@@ -197,7 +225,7 @@ const calculateTimeRemaining = (orderTime) => {
                     <p className="mt-2">Total Price: ₱{order.orderPrice}</p>
                     <p>Payment Method: {order.paymentMethod}</p>
                     <p>Status: {order.status}</p>
-                    <p>Pickup Time: {calculateTimeRemaining(order.orderTime)}</p>
+                    <p>Pickup Time: {calculateTimeRemaining(order.orderTime, order.status)}</p>
                     <div className="mt-4">
                       {order.status !== 'completed' && (
                         <>
@@ -241,7 +269,7 @@ const calculateTimeRemaining = (orderTime) => {
               <tbody>
                 {filteredOrders.map((order) => (
                   <tr key={order.id} className="bg-custom-gray border-b border-white text-white">
-                    <td className="p-4 text-center">{order.id}</td>
+                    <td className="p-4 text-center">{order.ticketNumber}</td>
                     <td className="p-4 text-center">
                       <ul>
                         {order.products &&
@@ -255,7 +283,7 @@ const calculateTimeRemaining = (orderTime) => {
                     <td className="p-4 text-center">₱{order.orderPrice || 'N/A'}</td>
                     <td className="p-4 text-center">{order.paymentMethod || 'N/A'}</td>
                     <td className="p-4 text-center">{order.status}</td>
-                    <td className="p-4 text-center">{calculateTimeRemaining(order.orderTime)}</td>
+                    <td className="p-4 text-center">{calculateTimeRemaining(order.orderTime, order.status)}</td>
                     <td className="p-4 text-center">
                       {order.status !== 'completed' && (
                         <>
