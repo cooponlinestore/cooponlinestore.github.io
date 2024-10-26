@@ -28,6 +28,7 @@ module.exports = {
         'Meals' : '#C7762C',
         'Cardbg' : '#FEFEFE',
         'gcash' : '#002CB8',
+        
       },
       borderRadius: {
         '50px': '50px', // Custom border radius for containers
@@ -57,6 +58,15 @@ module.exports = {
       'tablet': '640px', // Tablets start at 640px and above
       'laptop': '1024px',
       'desktop': '1280px',
+      },
+      keyframes: {
+        flash: {
+          '0%, 100%': { backgroundColor: 'rgba(0, 0, 255, 0.63)' },
+          //'50%': { backgroundColor: 'rgba(255, 255, 255, 1)' },
+        },
+      },
+      animation: {
+        'flash': 'flash 0.2s ease-in-out',
       },
     },
   },

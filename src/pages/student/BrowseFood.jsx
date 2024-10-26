@@ -6,7 +6,6 @@ import ProfileManagement from "./ProfileManagement";
 import OrderTicket from "./OrderTicket";
 import { Icon } from "@iconify/react";
 
-
 const BrowseFood = () => {
   const [foodItems, setFoodItems] = useState([]);
   const [cart, setCart] = useState([]);
@@ -15,6 +14,7 @@ const BrowseFood = () => {
   const [totalAmount, setTotalAmount] = useState(0);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("");
   const [gcashModalVisible, setGcashModalVisible] = useState(false);
+  const [clickedItemId, setClickedItemId] = useState(null); // Track clicked item for animation
   const user = getAuth().currentUser;
   const [isOrderTicketOpen, setIsOrderTicketOpen] = useState(false);
   const [currentOrderId, setCurrentOrderId] = useState(null);
@@ -60,8 +60,11 @@ const BrowseFood = () => {
     return () => unsubscribe();
   }, []);
 
-  // Add item to the cart
+  // Add item to the cart with flash effect
   const addToCart = (item) => {
+    setClickedItemId(item.id); // Set clicked item ID for animation
+    setTimeout(() => setClickedItemId(null), 500); // Remove animation after 500ms
+
     setCart((prevCart) => {
       const existingItem = prevCart.find((cartItem) => cartItem.id === item.id);
       if (existingItem) {
@@ -247,7 +250,9 @@ const BrowseFood = () => {
               <button
                 onClick={() => addToCart(item)}
                 key={item.id}
-                className="flex flex-col items-center p-4 bg-Cardbg rounded-sm lg:flex-row lg:justify-between"
+                className={`flex flex-col items-center p-4 bg-Cardbg rounded-sm lg:flex-row lg:justify-between transition duration-300 ${
+                  clickedItemId === item.id ? 'animate-flash' : ''
+                }`}
               >
                 <img src={item.image} alt={item.name} className="w-16 h-16 object-contain" />
                 <div className="flex flex-col items-center lg:flex-1 lg:items-start lg:px-4">
